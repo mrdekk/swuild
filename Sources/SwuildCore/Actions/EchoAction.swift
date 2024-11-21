@@ -1,6 +1,7 @@
 //  Created by Denis Malykh on 19.11.2024.
 
 import Foundation
+import BuildsDefinitions
 
 public struct EchoAction: Action {
     public static let name = "echo"
