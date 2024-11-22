@@ -1,7 +1,9 @@
 //  Created by Denis Malykh on 19.11.2024.
 
 import ArgumentParser
+import BuildsDefinitions
 import Foundation
+import SwuildCore
 import SwuildUtils
 
 enum EditErrors: Error {
@@ -17,22 +19,60 @@ struct Edit: AsyncParsableCommand {
     var inputFolder = FileManager.default.currentDirectoryPath
 
     mutating func run() async throws {
-        let xcode = try findXcodePath()
-        try sh(
-            command: "open", "-a", xcode, inputFolder
-        )
-    }
-
-    private func findXcodePath() throws -> String {
-        let xcode = try sh(
-            command: "xcode-select", "-p",
-            captureOutput: true
-        ).standardOutput
-        guard xcode.hasSuffix(kContentsDeveloperSuffix) else {
-            throw EditErrors.invalidXcodePath(message: "no contents/developer dir")
-        }
-        return String(xcode.dropLast(kContentsDeveloperSuffix.count))
+        let flow = EditFlow(inputFolder: inputFolder)
+        _ = try await flow.execute(context: makeContext())
     }
 }
 
 private let kContentsDeveloperSuffix = "/Contents/Developer"
+private let kXcodePathKey = "xcode_path"
+
+private struct EditFlow: Flow {
+    public let name = "example_flow"
+
+    public let platforms: [Platform] = [
+        .iOS(version: .any),
+        .macOS(version: .any),
+    ]
+
+    public let description = "Just an example flow"
+
+    public var actions: [any Action] {
+        [
+            ShellAction(
+                command: "xcode-select",
+                arguments: [
+                    .raw(arg: "-p")
+                ],
+                captureOutputToKey: kXcodePathKey
+            ),
+            AdHocAction { context in
+                guard
+                    let path: String = context.get(for: kXcodePathKey),
+                    path.hasSuffix(kContentsDeveloperSuffix)
+                else {
+                    return .failure(EditErrors.invalidXcodePath(message: "not valid path"))
+                }
+                context.put(
+                    for: kXcodePathKey,
+                    option: StringOption(defaultValue: String(path.dropLast(kContentsDeveloperSuffix.count)))
+                )
+                return .success(())
+            },
+            ShellAction(
+                command: "open",
+                arguments: [
+                    .raw(arg: "-a"),
+                    .key(key: kXcodePathKey),
+                    .raw(arg: inputFolder)
+                ]
+            )
+        ]
+    }
+
+    private let inputFolder: String
+
+    init(inputFolder: String) {
+        self.inputFolder = inputFolder
+    }
+}

@@ -10,6 +10,11 @@ public enum ShellActionErrors: Error {
 
 public struct ShellAction: Action {
 
+    public enum Argument {
+        case raw(arg: String)
+        case key(key: String)
+    }
+
     public static let name = "sh"
     public static let description = "Action to execute shell commands"
     public static let authors = Author.defaultAuthors
@@ -19,13 +24,13 @@ public struct ShellAction: Action {
     }
 
     private let command: String
-    private let arguments: [String]
+    private let arguments: [Argument]
     private let captureOutputToKey: String?
     private let workingDirectory: String
 
     public init(
         command: String,
-        arguments: [String] = [],
+        arguments: [Argument] = [],
         captureOutputToKey: String? = nil,
         workingDirectory: String = FileManager.default.currentDirectoryPath
     ) {
@@ -38,7 +43,15 @@ public struct ShellAction: Action {
     public func execute(context: Context) async throws -> Result<Void, Error> {
         do {
             let result = try sh(
-                command: [command] + arguments,
+                command: [command] + arguments.compactMap { arg in
+                    switch arg {
+                    case let .raw(str):
+                        return str
+
+                    case let .key(key):
+                        return context.get(for: key)
+                    }
+                },
                 captureOutput: captureOutputToKey != nil,
                 currentDirectoryPath: workingDirectory
             )

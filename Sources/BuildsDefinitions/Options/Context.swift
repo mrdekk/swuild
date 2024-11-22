@@ -4,7 +4,7 @@ import Foundation
 
 public protocol Option {}
 
-public class OptionValue<T>: Option, CustomDebugStringConvertible {
+open class OptionValue<T>: Option, CustomDebugStringConvertible {
     public var value: T
 
     public init(defaultValue: T) {
