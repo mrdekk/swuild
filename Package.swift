@@ -64,6 +64,7 @@ let package = Package(
             name: "Tutorial",
             dependencies: [
                 .byName(name: "BuildsDefinitions"),
+                .byName(name: "SwuildCore"),
                 .byName(name: "FlowBuildableMacro"),
                 .byName(name: "FlowBuildableSwiftMacro"),
             ],

@@ -8,5 +8,11 @@ public enum Platform {
         case any
     }
 
+    public enum macOSVersions {
+        // TODO: to be defined somehow, just a valid extension point
+        case any
+    }
+
     case iOS(version: iOSVersions)
+    case macOS(version: macOSVersions)
 }

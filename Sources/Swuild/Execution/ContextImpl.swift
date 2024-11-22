@@ -25,8 +25,7 @@ final class ContextImpl: Context {
     }
 }
 
-
-public func makeContext() -> Context {
+func makeContext() -> Context {
     return ContextImpl()
 }
 

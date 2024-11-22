@@ -42,3 +42,27 @@ struct Run: AsyncParsableCommand {
     }
 }
 
+extension Flow {
+    func execute(context: Context) async throws -> Result<Void, FlowErrors> {
+        do {
+            for platform in platforms {
+                for action in actions {
+                    guard type(of: action).isSupported(for: platform) else {
+                        continue
+                    }
+
+                    let result = try await action.execute(context: context)
+                    switch result {
+                    case .success:
+                        break
+                    case let .failure(error):
+                        throw FlowErrors.actionExecution(cause: error)
+                    }
+                }
+            }
+            return .success(())
+        } catch {
+            return .failure(.actionExecution(cause: error))
+        }
+    }
+}
