@@ -4,50 +4,41 @@ import ArgumentParser
 import BuildsDefinitions
 import Foundation
 import SwuildCore
+import SwuildUtils
 
 struct Run: AsyncParsableCommand {
+
+    enum Errors: Error {
+        case noSuchProductDefinition
+    }
+
+    @ArgumentParser.Option(
+        name: .shortAndLong,
+        help: "Directory where Package.swift of Flow definition is located"
+    )
+    var inputFolder = FileManager.default.currentDirectoryPath
+
+    @ArgumentParser.Option(
+        name: .shortAndLong,
+        help: "Product name of Flow definition"
+    )
+    var flowName: String = "Flow"
+
     mutating func run() async throws {
         do {
-            let flow = try flow(at: "/Users/mrdekk/AppR/swuild/libTutorial.dylib")
+            let builder = PackageBuilder()
+            let binary = try await builder.buildPackage(at: inputFolder, productName: flowName)
+
+            let plugin = Plugin(path: binary)
+            try plugin.load()
+            let flow = try plugin.build()
+
             let context = makeContext()
             let result = try await flow.execute(context: context)
             print("Result is \(result)")
         } catch {
-
+            print("Error is \(error)")
         }
     }
 }
 
-enum RunErrors: Error {
-    case libraryLoadingError(message: String)
-    case symbolLoadingError
-}
-
-typealias InitFunction = @convention(c) () -> UnsafeMutableRawPointer
-
-private func flow(at path: String) throws -> Flow {
-    let openRes = dlopen(path, RTLD_NOW | RTLD_LOCAL)
-    guard let openRes else {
-        if let err = dlerror() {
-            throw RunErrors.libraryLoadingError(message: String(format: "%s", err))
-        } else {
-            throw RunErrors.libraryLoadingError(message: "Unknown loading error")
-        }
-    }
-
-//    defer {
-//        dlclose(openRes)
-//    }
-
-    let symbolName = "makeFlow"
-    let sym = dlsym(openRes, symbolName)
-
-    guard let sym else {
-        throw RunErrors.symbolLoadingError
-    }
-
-    let f: InitFunction = unsafeBitCast(sym, to: InitFunction.self)
-    let flowPointer = f()
-    let builder = Unmanaged<FlowBuilder>.fromOpaque(flowPointer).takeRetainedValue()
-    return builder.build()
-}

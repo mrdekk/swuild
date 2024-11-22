@@ -13,6 +13,7 @@ let package = Package(
         .watchOS(.v6),
     ],
     products: [
+        .library(name: "SwuildUtils", targets: ["SwuildUtils"]),
         .library(name: "BuildsDefinitions", targets: ["BuildsDefinitions"]),
         .library(name: "SwuildCore", targets: ["SwuildCore"]),
         .library(
@@ -50,6 +51,10 @@ let package = Package(
             path: "Sources/BuildsDefinitions"
         ),
         .target(
+            name: "SwuildUtils",
+            path: "Sources/SwuildUtils"
+        ),
+        .target(
             name: "SwuildCore",
             dependencies: [
                 .byName(name: "BuildsDefinitions"),
@@ -72,6 +77,7 @@ let package = Package(
             name: "Swuild",
             dependencies: [
                 .byName(name: "BuildsDefinitions"),
+                .byName(name: "SwuildUtils"),
                 .byName(name: "SwuildCore"),
                 .byName(name: "Tutorial"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
