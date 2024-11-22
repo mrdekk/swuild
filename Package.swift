@@ -24,7 +24,6 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: Version(1, 5, 0)),
-        .package(url: "https://github.com/tuist/XcodeProj.git", from: Version(8, 24, 9)),
         .package(url: "https://github.com/apple/swift-syntax.git", from: Version(600, 0, 0))
     ],
     targets: [
@@ -81,7 +80,6 @@ let package = Package(
                 .byName(name: "SwuildCore"),
                 .byName(name: "Tutorial"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                .product(name: "XcodeProj", package: "XcodeProj"),
             ],
             path: "Sources/Swuild"
         ),
