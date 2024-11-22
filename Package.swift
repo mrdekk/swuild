@@ -57,6 +57,7 @@ let package = Package(
             name: "SwuildCore",
             dependencies: [
                 .byName(name: "BuildsDefinitions"),
+                .byName(name: "SwuildUtils"),
             ],
             path: "Sources/SwuildCore"
         ),

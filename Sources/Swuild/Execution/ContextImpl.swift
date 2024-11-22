@@ -3,7 +3,11 @@
 import Foundation
 import BuildsDefinitions
 
-final class ContextImpl: Context {
+protocol ContextPrintable {
+    func printContext()
+}
+
+final class ContextImpl: Context, ContextPrintable {
     private var storage: [String: Option] = [:]
 
     public func put<T>(for key: String, option: OptionValue<T>) {
@@ -22,6 +26,17 @@ final class ContextImpl: Context {
         let contains = storage[key] != nil
         storage.removeValue(forKey: key)
         return contains
+    }
+
+    public func printContext() {
+        print("Context is:")
+        for (key, option) in storage {
+            if let describing = option as? CustomDebugStringConvertible {
+                print("  \(key) => \(describing.debugDescription)")
+            } else {
+                print("  \(key) => <unpresentable>")
+            }
+        }
     }
 }
 

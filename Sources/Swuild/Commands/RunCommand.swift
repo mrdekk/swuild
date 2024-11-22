@@ -24,6 +24,12 @@ struct Run: AsyncParsableCommand {
     )
     var flowName: String = "Flow"
 
+    @ArgumentParser.Option(
+        name: .shortAndLong,
+        help: "Print resulting content after build execution"
+    )
+    var printResultContext: Bool = false
+
     mutating func run() async throws {
         do {
             let builder = PackageBuilder()
@@ -35,7 +41,11 @@ struct Run: AsyncParsableCommand {
 
             let context = makeContext()
             let result = try await flow.execute(context: context)
+
             print("Result is \(result)")
+            if printResultContext, let impl = context as? ContextPrintable {
+                impl.printContext()
+            }
         } catch {
             print("Error is \(error)")
         }

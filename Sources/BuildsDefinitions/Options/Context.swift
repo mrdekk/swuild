@@ -4,11 +4,15 @@ import Foundation
 
 public protocol Option {}
 
-public class OptionValue<T>: Option {
+public class OptionValue<T>: Option, CustomDebugStringConvertible {
     public var value: T
 
     public init(defaultValue: T) {
         self.value = defaultValue
+    }
+
+    public var debugDescription: String {
+        String(describing: value)
     }
 }
 
