@@ -1,0 +1,21 @@
+name: Build Swuild
+
+on:
+  push:
+    branches: [ "main" ]
+
+  pull_triggers:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Show Swift Version
+        run: swift --version
+
+      - name: Build Swuild
+        run: swift build --configuration release
