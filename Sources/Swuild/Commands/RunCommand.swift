@@ -22,7 +22,7 @@ struct Run: AsyncParsableCommand {
         name: .shortAndLong,
         help: "Product name of Flow definition"
     )
-    var flowName: String = "Flow"
+    var flowProductName: String = "Flow"
 
     @ArgumentParser.Option(
         name: .shortAndLong,
@@ -32,14 +32,19 @@ struct Run: AsyncParsableCommand {
 
     mutating func run() async throws {
         do {
+            print("Swuild Build")
+            print("  input folder: \(inputFolder)")
+            print("  flow name: \(flowProductName)")
+            print("  print result context: \(printResultContext)")
+
             let buildContext = makeContext()
-            let buildFlow = RunFlow(productName: flowName, inputFolder: inputFolder)
+            let buildFlow = RunFlow(productName: flowProductName, inputFolder: inputFolder)
             let buildResult = try await buildFlow.execute(context: buildContext)
             guard
                 case .success = buildResult,
                 let flowPlugingPath: String = buildContext.get(for: kFlowPluginKey)
             else {
-                throw PackageBuilderErrors.genericBuildError(message: "build flow execution failure")
+                throw PackageBuilderErrors.genericBuildError(message: "build flow execution failure: \(buildResult)")
             }
 
             let plugin = Plugin(path: flowPlugingPath)

@@ -1,5 +1,7 @@
 # Swuild
 
+[![Build Swuild](https://github.com/mrdekk/swuild/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/mrdekk/swuild/actions/workflows/build.yaml)
+
 Swift build system (aka CI scripts with Swift language)
 
 In early development, no promises yet...

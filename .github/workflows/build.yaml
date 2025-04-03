@@ -19,3 +19,10 @@ jobs:
 
       - name: Build Swuild
         run: swift build --configuration release
+
+      - name: Get Result Swuild binary
+        id: swuild_bin_path
+        run: echo "swuild_path=$(swift build --show-bin-path)" >> $GITHUB_OUTPUT
+
+      - name: Run Tutorial Flow
+        run: "${{ steps.swuild_bin_path.outputs.swuild_path }}/Swuild run --flow-product-name Tutorial"
