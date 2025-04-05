@@ -21,6 +21,11 @@ let package = Package(
             type: .dynamic,
             targets: ["Tutorial"]
         ),
+        .library(
+            name: "SwuildPack",
+            type: .dynamic,
+            targets: ["SwuildPack"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: Version(1, 5, 0)),
@@ -78,6 +83,18 @@ let package = Package(
                 .byName(name: "FlowBuildableSwiftMacro"),
             ],
             path: "Sources/Tutorial",
+            plugins: [
+                .plugin(name: "FlowBuildableMacro"),
+            ]
+        ),
+        .target(
+            name: "SwuildPack",
+            dependencies: [
+                .byName(name: "BuildsDefinitions"),
+                .byName(name: "SwuildCore"),
+                .byName(name: "FlowBuildableSwiftMacro"),
+            ],
+            path: "Sources/SwuildPack",
             plugins: [
                 .plugin(name: "FlowBuildableMacro"),
             ]

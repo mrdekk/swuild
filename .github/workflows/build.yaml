@@ -26,3 +26,14 @@ jobs:
 
       - name: Run Tutorial Flow
         run: "${{ steps.swuild_bin_path.outputs.swuild_path }}/Swuild run --flow-product-name Tutorial"
+
+      - name: Run Swuild Pack Flow (packing swuild itself)
+        run: "${{ steps.swuild_bin_path.outputs.swuild_path }}/Swuid run --flow-product-name SwuildPack"
+
+      - name: Archive Swuild iteself
+        uses: actions/upload-artifact@v4
+        with:
+          name: swuild.tar.gz
+          path: ./build/swuild.tar.gz
+          overwrite: true
+          compression-level: 0
