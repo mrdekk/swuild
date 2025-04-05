@@ -16,7 +16,7 @@ public struct ExampleFlow: Flow {
     public let description = "Just an example flow"
 
     public let actions: [any Action] = [
-        EchoAction { .raw(message: "Just and Echo") },
+        EchoAction { .raw(arg: "Just and Echo") },
         ShellAction(command: "ls", arguments: [.raw(arg: "-la")], captureOutputToKey: "listing"),
         EchoAction { .key(key: "listing") },
         ExampleAction(greeting: "World"),

@@ -5,12 +5,7 @@ import BuildsDefinitions
 
 public struct EchoAction: Action {
 
-    public enum Content {
-        case raw(message: String)
-        case key(key: String)
-    }
-
-    public typealias ContentProvider = () -> Content
+    public typealias ContentProvider = () -> Argument<String>
 
     public static let name = "echo"
     public static let description = "Simple echo action for tests"
@@ -27,7 +22,7 @@ public struct EchoAction: Action {
     }
 
     public init(content: String) {
-        self.init(contentProvider: { .raw(message: content) })
+        self.init(contentProvider: { .raw(arg: content) })
     }
 
     public func execute(context: Context) async throws -> Result<Void, Error> {

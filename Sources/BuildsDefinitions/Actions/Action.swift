@@ -2,7 +2,7 @@
 
 import Foundation
 
-public protocol Action {
+public protocol Action: ContextExecutable {
     static var name: String { get }
     static var description: String { get }
     static var authors: [Author] { get }

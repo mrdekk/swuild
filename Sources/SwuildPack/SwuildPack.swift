@@ -20,7 +20,7 @@ public struct SwuildPackFlow: Flow {
     public let description = "Special flow to pack Swuild Binary"
 
     public let actions: [any Action] = [
-        EchoAction { .raw(message: "Packing Swuild to release binary") },
+        EchoAction { .raw(arg: "Packing Swuild to release binary") },
         SPMAction(
             job: .build(
                 product: kSwuildProduct,
