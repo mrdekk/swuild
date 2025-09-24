@@ -57,7 +57,7 @@ public struct SwuildPackFlow: Flow {
     ]
 }
 
-#flowBuildable(SwuildPackFlow)
+#flowBuildable(SwuildPackFlow.self)
 
 private let kSwuildProduct = "Swuild"
 private let kReleaseConfiguration = "release"

@@ -23,4 +23,4 @@ public struct ExampleFlow: Flow {
     ]
 }
 
-#flowBuildable(ExampleFlow)
+#flowBuildable(ExampleFlow.self)

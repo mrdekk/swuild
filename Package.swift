@@ -26,6 +26,10 @@ let package = Package(
             type: .dynamic,
             targets: ["SwuildPack"]
         ),
+        .library(
+            name: "iSwuild",
+            targets: ["iSwuild"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: Version(1, 5, 0)),
@@ -109,6 +113,14 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ],
             path: "Sources/Swuild"
+        ),
+        .target(
+            name: "iSwuild",
+            dependencies: [
+                .byName(name: "BuildsDefinitions"),
+                .byName(name: "SwuildUtils"),
+            ],
+            path: "Sources/iSwuild"
         ),
     ]
 )
