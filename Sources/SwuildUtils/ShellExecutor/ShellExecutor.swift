@@ -38,22 +38,61 @@ public class ShellExecutor {
             process.currentDirectoryURL = URL(fileURLWithPath: path)
         }
 
-        let outputPipe = Pipe()
-        let errorPipe = Pipe()
+        var stdoutFileURL: URL?
+        var stderrFileURL: URL?
+        var stdoutFileHandle: FileHandle?
+        var stderrFileHandle: FileHandle?
+
         if captureOutput {
-            process.standardOutput = outputPipe
-            process.standardError = errorPipe
+            let stdoutFile = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            stdoutFileURL = stdoutFile
+            FileManager.default.createFile(atPath: stdoutFile.path, contents: nil, attributes: nil)
+            stdoutFileHandle = try? FileHandle(forWritingTo: stdoutFile)
+            process.standardOutput = stdoutFileHandle
+
+            let stderrFile = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            stderrFileURL = stderrFile
+            FileManager.default.createFile(atPath: stderrFile.path, contents: nil, attributes: nil)
+            stderrFileHandle = try? FileHandle(forWritingTo: stderrFile)
+            process.standardError = stderrFileHandle
+        } else {
+            process.standardOutput = nil
+            process.standardError = nil
         }
 
         try process.run()
         process.waitUntilExit()
 
-        let standardOutput = captureOutput ? outputPipe.string ?? "" : ""
-        let standardError = captureOutput ? errorPipe.string ?? "" : ""
+        let standardOutput = {
+            if captureOutput, let stdoutFileURL {
+                do {
+                    let stdoutData = try Data(contentsOf: stdoutFileURL)
+                    try? FileManager.default.removeItem(at: stdoutFileURL)
+                    return String(data: stdoutData, encoding: .utf8) ?? ""
+                } catch {
+                    return "error on getting stdout result \(error)"
+                }
+            }
+            return ""
+        }()
+
+        let standardError = {
+            if captureOutput, let stderrFileURL {
+                do {
+                    let stderrData = try Data(contentsOf: stderrFileURL)
+                    try? FileManager.default.removeItem(at: stderrFileURL)
+                    return String(data: stderrData, encoding: .utf8) ?? ""
+                } catch {
+                    return "error on getting stderr result \(error)"
+                }
+            }
+            return ""
+        }()
+
         return Result(
             exitStatus: Int(process.terminationStatus),
-            standardOutput: standardOutput,
-            standardError: standardError
+            standardOutput: standardOutput.trimmingCharacters(in: .whitespacesAndNewlines),
+            standardError: standardError.trimmingCharacters(in: .whitespacesAndNewlines)
         )
     }
 }

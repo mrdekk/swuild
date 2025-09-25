@@ -30,6 +30,10 @@ let package = Package(
             name: "iSwuild",
             targets: ["iSwuild"]
         ),
+        .library(
+            name: "FlowBuildableSwiftMacro",
+            targets: ["FlowBuildableSwiftMacro"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: Version(1, 5, 0)),
