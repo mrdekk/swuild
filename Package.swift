@@ -17,11 +17,6 @@ let package = Package(
         .library(name: "BuildsDefinitions", targets: ["BuildsDefinitions"]),
         .library(name: "SwuildCore", targets: ["SwuildCore"]),
         .library(
-            name: "Tutorial",
-            type: .dynamic,
-            targets: ["Tutorial"]
-        ),
-        .library(
             name: "SwuildPack",
             type: .dynamic,
             targets: ["SwuildPack"]
@@ -83,19 +78,6 @@ let package = Package(
             path: "Sources/SwuildBuild"
         ),
         .target(
-            name: "Tutorial",
-            dependencies: [
-                .byName(name: "BuildsDefinitions"),
-                .byName(name: "SwuildCore"),
-                .byName(name: "FlowBuildableMacro"),
-                .byName(name: "FlowBuildableSwiftMacro"),
-            ],
-            path: "Sources/Tutorial",
-            plugins: [
-                .plugin(name: "FlowBuildableMacro"),
-            ]
-        ),
-        .target(
             name: "SwuildPack",
             dependencies: [
                 .byName(name: "BuildsDefinitions"),
@@ -113,7 +95,6 @@ let package = Package(
                 .byName(name: "BuildsDefinitions"),
                 .byName(name: "SwuildUtils"),
                 .byName(name: "SwuildCore"),
-                .byName(name: "Tutorial"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ],
             path: "Sources/Swuild"

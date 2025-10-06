@@ -83,3 +83,62 @@ You could extend this code to provide some more instantiation things (plugin sys
 ```
 
 and system will codegen needed thigs automagically.
+
+## Function Builder Support
+
+Swuild also supports a SwiftUI-like function builder syntax for defining flows, making it easier to create complex flows with conditional logic and loops. This approach is similar to how SwiftUI uses ViewBuilder for the body property.
+
+To use the function builder approach, you can create flows using the `BasicFlow` struct:
+
+```swift
+import BuildsDefinitions
+import SwuildCore
+
+let flow = BasicFlow(
+    name: "example_flow",
+    platforms: [.macOS(version: .any)],
+    description: "An example flow using function builder"
+) {
+    EchoAction { .raw(arg: "Hello from function builder!") }
+    ShellAction(command: "echo", arguments: [.raw(arg: "Simple command")])
+    
+    // Conditional actions
+    if shouldListFiles {
+        ShellAction(
+            command: "ls",
+            arguments: [.raw(arg: "-la")],
+            captureOutputToKey: "listing"
+        )
+        EchoAction { .key(key: "listing") }
+    }
+    
+    // Loop actions
+    for i in 1...3 {
+        EchoAction { .raw(arg: "Iteration \(i)") }
+    }
+}
+```
+
+The function builder supports all standard Swift language features:
+1. **Conditional actions** using `if` statements
+2. **Array of actions** using `for` loops
+3. **Platform-specific actions** using compilation conditions (`#if`)
+4. **Combining multiple actions** in a single block
+
+For flows created with the function builder approach, you can use the `#flowBuildableWithFactory` macro:
+
+```swift
+#flowBuildableWithFactory(FlowBuilderExamples.self, "makeComplexFlow")
+```
+
+This macro generates the necessary code to dynamically load your flow by calling the specified factory method.
+
+## Examples
+
+For more detailed examples of how to use Swuild, check out the examples in the `Examples` directory:
+
+1. `Examples/StandardApp` - A complete example of building a standard iOS/macOS app
+1. `Examples/Tutorial` - Examples of basic usage of flows and actions
+1. `Examples/TutorialBuilders` - Examples of using the function builder syntax for flows
+
+Each example contains its own README.md with detailed instructions on how to build and run it.

@@ -8,5 +8,6 @@ import SwiftSyntaxMacros
 struct FlowBuildablePlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         FlowBuildableMacro.self,
+        FlowBuildableWithFactoryMacro.self,
     ]
 }
