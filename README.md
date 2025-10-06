@@ -6,20 +6,20 @@ Swift build system (aka CI scripts with Swift language)
 
 In early development, no promises yet...
 
-But if you interested in, star the project or fire issues with your willings. Or may be you could make some PR's to extend the functionality. I will be very grateful.
+But if you're interested, star the project or file issues with your suggestions. Or maybe you could make some PRs to extend the functionality. I will be very grateful.
 
 ## Basic Usage
 
-With Swuild you can write some CI workflows with swift programming language and pack it to the swift package. Just is.
+With Swuild you can write CI workflows with the Swift programming language and package them into a Swift package. That's it.
 
-Basic sample Located in /Sources/Tutorial directory and will be kept up to date.
+The basic sample is located in the /Sources/Tutorial directory and will be kept up to date.
 
 There are two main things in Swuild: Actions and Flows.
 
 - **Actions**: some parts of work to do (build one item or just report)
 - **Flows**: composite of sequential actions to perform some finished work.
 
-For all definitions you have to use 'BuildsDefinitions' package. And for some predefined actions and flows, there are SwuildCore (very basic stuff) and other packages.
+For all definitions, you have to use the 'BuildsDefinitions' package. And for some predefined actions and flows, there are SwuildCore (very basic stuff) and other packages.
 
 You can define your actions as:
 
@@ -35,11 +35,11 @@ public struct <your name of action>Action: Action {
     public static let authors = ["<emails of authors of action>", ...]
 
     public static func isSupported(for platform: Platform) -> Bool {
-        <predicate to check is this action is supported to this platform>
+        <predicate to check if this action is supported on this platform>
     }
 
     public func execute(context: Context) async throws -> Result<Void, Error> {
-        <your execution code of your action>
+        <your action execution code>
     }
 }
 ```
@@ -56,12 +56,12 @@ public struct <your name of flow>Flow: Flow {
     public let description = "<some human readable description of your flow>"
 
     public let actions: [any Action] = [
-        <instantiate any actions your want to incorporate to this flow>
+        <instantiate any actions you want to incorporate into this flow>
     ]
 }
 ```  
 
-One final step, to system to be able to compiled, load and execute your flow, you should provide some boilerplate code (sorry for that). In general it looks like:
+One final step: for the system to be able to compile, load, and execute your flow, you should provide some boilerplate code (sorry for that). In general, it looks like:
 
 ```swift
 @_cdecl("makeFlow")
@@ -70,7 +70,7 @@ public func makeFlow() -> UnsafeMutableRawPointer {
 }
 ```
 
-"makeFlow" is the function name you could provide as parameter to swuild, and in one module you can have many of them (see TutorialBuilders for example). Swuild will use name of function provided in @_cdecl annotation.
+"makeFlow" is the function name you can provide as a parameter to swuild, and in one module you can have many of them (see TutorialBuilders for example). Swuild will use the name of the function provided in the @_cdecl annotation.
 
 ## Function Builder Support
 
@@ -113,12 +113,12 @@ The function builder supports all standard Swift language features:
 3. **Platform-specific actions** using compilation conditions (`#if`)
 4. **Combining multiple actions** in a single block
 
-For flows created with the function builder approach, you should write 'makeFlow' function like this:
+For flows created with the function builder approach, you should write the 'makeFlow' function like this:
 
 ```swift
 @_cdecl("makeBatchFlow")
 public func makeBatchFlow() -> UnsafeMutableRawPointer {
-    flow { <your flow factory function name>() }
+    flow { <your flow factory function>() }
 }
 ```
 
