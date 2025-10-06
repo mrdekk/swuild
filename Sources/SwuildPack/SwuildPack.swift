@@ -2,7 +2,6 @@
 
 import BuildsDefinitions
 import Foundation
-import FlowBuildableSwiftMacro
 import SwuildCore
 
 public struct SwuildPackFlow: Flow {
@@ -57,7 +56,10 @@ public struct SwuildPackFlow: Flow {
     ]
 }
 
-#flowBuildable(SwuildPackFlow.self)
+@_cdecl("makeFlow")
+public func makeFlow() -> UnsafeMutableRawPointer {
+    flow { SwuildPackFlow() }
+}
 
 private let kSwuildProduct = "Swuild"
 private let kReleaseConfiguration = "release"

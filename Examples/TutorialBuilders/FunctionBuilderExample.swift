@@ -29,13 +29,16 @@ public enum FlowBuilderExamples {
         }
     }
     
-    public static func makeConditionalFlow(shouldListFiles: Bool) -> some Flow {
+    public static func makeConditionalFlow() -> some Flow {
         return BasicFlow(
             name: "conditional_flow",
             platforms: [.macOS(version: .any)],
             description: "A flow with conditional actions"
         ) {
             EchoAction { .raw(arg: "Starting conditional flow") }
+            
+            // Use a fixed value instead of parameter
+            let shouldListFiles = true
             
             if shouldListFiles {
                 ShellAction(
@@ -52,13 +55,16 @@ public enum FlowBuilderExamples {
         }
     }
     
-    public static func makeBatchFlow(commands: [String]) -> some Flow {
+    public static func makeBatchFlow() -> some Flow {
         return BasicFlow(
             name: "batch_flow",
             platforms: [.macOS(version: .any)],
             description: "A flow that executes a batch of commands"
         ) {
             EchoAction { .raw(arg: "Starting batch flow") }
+            
+            // Use fixed test commands instead of parameter
+            let commands = ["echo Hello", "echo World", "ls -la"]
             
             for command in commands {
                 ShellAction(command: command)

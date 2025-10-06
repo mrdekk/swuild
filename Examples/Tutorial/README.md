@@ -36,12 +36,3 @@ To build this example, run:
 swift build
 ```
 
-## Using the FlowBuildable Macro
-
-This example demonstrates how to use the `#flowBuildable` macro to automatically generate a flow builder for your flows:
-
-```swift
-#flowBuildable(ExampleFlow.self)
-```
-
-This macro generates the necessary code to make your flow loadable by the Swuild system.

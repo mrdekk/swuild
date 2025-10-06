@@ -2,7 +2,6 @@
 
 import BuildsDefinitions
 import Foundation
-import FlowBuildableSwiftMacro
 import SwuildCore
 import iSwuild
 
@@ -54,4 +53,7 @@ public struct StandardAppBuildFlow: Flow {
     ]
 }
 
-#flowBuildable(StandardAppBuildFlow.self)
+@_cdecl("makeFlow")
+public func makeFlow() -> UnsafeMutableRawPointer {
+    flow { StandardAppBuildFlow() }
+}

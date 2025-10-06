@@ -64,25 +64,13 @@ public struct <your name of flow>Flow: Flow {
 One final step, to system to be able to compiled, load and execute your flow, you should provide some boilerplate code (sorry for that). In general it looks like:
 
 ```swift
-final class <your name of flow>FlowBuilder: FlowBuilder {
-    override func build() -> any Flow {
-        <your name of flow>Flow()
-    }
-}
-
 @_cdecl("makeFlow")
 public func makeFlow() -> UnsafeMutableRawPointer {
-    return Unmanaged.passRetained(<your name of flow>FlowBuilder()).toOpaque()
+    flow { <your name of flow>Flow() }
 }
 ```
 
-You could extend this code to provide some more instantiation things (plugin system will load the dylib and call to makeFlow function). Or if you don't want to wrangle around, you could simplify your efforts and use predefined swift macro
-
-```swift
-#flowBuildable(<your name of flow>Flow)
-```
-
-and system will codegen needed thigs automagically.
+"makeFlow" is the function name you could provide as parameter to swuild, and in one module you can have many of them (see TutorialBuilders for example). Swuild will use name of function provided in @_cdecl annotation.
 
 ## Function Builder Support
 
@@ -125,13 +113,14 @@ The function builder supports all standard Swift language features:
 3. **Platform-specific actions** using compilation conditions (`#if`)
 4. **Combining multiple actions** in a single block
 
-For flows created with the function builder approach, you can use the `#flowBuildableWithFactory` macro:
+For flows created with the function builder approach, you should write 'makeFlow' function like this:
 
 ```swift
-#flowBuildableWithFactory(FlowBuilderExamples.self, "makeComplexFlow")
+@_cdecl("makeBatchFlow")
+public func makeBatchFlow() -> UnsafeMutableRawPointer {
+    flow { <your flow factory function name>() }
+}
 ```
-
-This macro generates the necessary code to dynamically load your flow by calling the specified factory method.
 
 ## Examples
 

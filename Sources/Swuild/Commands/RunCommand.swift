@@ -30,11 +30,18 @@ struct Run: AsyncParsableCommand {
     )
     var printResultContext: Bool = false
 
+    @ArgumentParser.Option(
+        name: .long,
+        help: "Function name to create flow builder"
+    )
+    var functionName: String = "makeFlow"
+
     mutating func run() async throws {
         do {
             print("Swuild Build")
             print("  input folder: \(inputFolder)")
             print("  flow name: \(flowProductName)")
+            print("  function name: \(functionName)")
             print("  print result context: \(printResultContext)")
 
             let buildContext = makeContext()
@@ -48,8 +55,9 @@ struct Run: AsyncParsableCommand {
             }
 
             let plugin = Plugin(path: flowPlugingPath)
-            try plugin.load()
-            let flow = try plugin.build()
+            try plugin.loadLibrary()
+            let flowBuilder = try plugin.makeFlowBuilder(functionName: functionName)
+            let flow = flowBuilder.build()
 
             let context = makeContext()
             let result = try await flow.execute(context: context)

@@ -2,13 +2,29 @@
 
 import Foundation
 
-open class FlowBuilder {
+public final class FlowBuilder {
+    public typealias Buildable = () -> Flow
 
-    public init() {}
+    private let buildable: Buildable
 
-    open func build() -> Flow {
-        fatalError("You have to override this method.")
+    public init(buildable: @escaping Buildable) {
+        self.buildable = buildable
     }
+
+    public init(flow: Flow) {
+        self.buildable = { flow }
+    }
+
+    public func build() -> Flow {
+        buildable()
+    }
+}
+
+public func flow(_ buildable: @escaping () -> Flow) -> UnsafeMutableRawPointer {
+    return Unmanaged.passRetained(
+        FlowBuilder(buildable: buildable)
+    ).toOpaque()
+
 }
 
 // MARK: - Function Builder for Flow Actions

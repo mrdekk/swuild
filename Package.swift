@@ -25,34 +25,12 @@ let package = Package(
             name: "iSwuild",
             targets: ["iSwuild"]
         ),
-        .library(
-            name: "FlowBuildableSwiftMacro",
-            targets: ["FlowBuildableSwiftMacro"]
-        ),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: Version(1, 5, 0)),
         .package(url: "https://github.com/apple/swift-syntax.git", from: Version(600, 0, 0))
     ],
     targets: [
-        .macro(
-            name: "FlowBuildableMacro",
-            dependencies: [
-                .byName(name: "BuildsDefinitions"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-                .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
-                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-            ],
-            path: "Sources/Macros/FlowBuildableMacro"
-        ),
-        .target(
-            name: "FlowBuildableSwiftMacro",
-            dependencies: [
-                .byName(name: "FlowBuildableMacro"),
-            ],
-            path: "Sources/Macros/FlowBuildableSwiftMacro"
-        ),
         .target(
             name: "BuildsDefinitions",
             path: "Sources/BuildsDefinitions"
@@ -82,12 +60,8 @@ let package = Package(
             dependencies: [
                 .byName(name: "BuildsDefinitions"),
                 .byName(name: "SwuildCore"),
-                .byName(name: "FlowBuildableSwiftMacro"),
             ],
-            path: "Sources/SwuildPack",
-            plugins: [
-                .plugin(name: "FlowBuildableMacro"),
-            ]
+            path: "Sources/SwuildPack"
         ),
         .executableTarget(
             name: "Swuild",

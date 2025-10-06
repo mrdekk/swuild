@@ -16,7 +16,6 @@ final class Plugin {
     private let path: String
 
     private var resourceHandler: UnsafeMutableRawPointer?
-    private var flowBuilder: FlowBuilder?
 
     init(path: String) {
         self.path = path
@@ -28,7 +27,7 @@ final class Plugin {
         }
     }
 
-    func load() throws {
+    func loadLibrary() throws {
         let openRes = dlopen(path, RTLD_NOW | RTLD_LOCAL)
         guard let openRes else {
             if let err = dlerror() {
@@ -37,9 +36,16 @@ final class Plugin {
                 throw PluginErrors.libraryLoadingError(message: "Unknown loading error")
             }
         }
+        
+        resourceHandler = openRes
+    }
 
-        let symbolName = "makeFlow"
-        let sym = dlsym(openRes, symbolName)
+    func makeFlowBuilder(functionName: String = "makeFlow") throws -> FlowBuilder {
+        guard let resourceHandler else {
+            throw PluginErrors.libraryLoadingError(message: "Library not loaded")
+        }
+
+        let sym = dlsym(resourceHandler, functionName)
 
         guard let sym else {
             throw PluginErrors.symbolLoadingError
@@ -47,19 +53,13 @@ final class Plugin {
 
         let f: InitFunction = unsafeBitCast(sym, to: InitFunction.self)
         let flowPointer = f()
-        flowBuilder = Unmanaged<FlowBuilder>.fromOpaque(flowPointer).takeRetainedValue()
+        return Unmanaged<FlowBuilder>.fromOpaque(flowPointer).takeRetainedValue()
     }
 
     func unload() {
         if let resourceHandler {
             dlclose(resourceHandler)
+            self.resourceHandler = nil
         }
-    }
-
-    func build() throws -> Flow {
-        guard let flowBuilder else {
-            throw PluginErrors.pluginIsNotLoaded
-        }
-        return flowBuilder.build()
     }
 }

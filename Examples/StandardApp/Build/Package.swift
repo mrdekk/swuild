@@ -25,7 +25,6 @@ let package = Package(
                 .product(name: "iSwuild", package: "Swuild"),
                 .product(name: "BuildsDefinitions", package: "Swuild"),
                 .product(name: "SwuildCore", package: "Swuild"),
-                .product(name: "FlowBuildableSwiftMacro", package: "Swuild"),
             ],
             path: "Sources"
         ),

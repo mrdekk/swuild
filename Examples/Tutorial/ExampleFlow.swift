@@ -2,7 +2,6 @@
 
 import BuildsDefinitions
 import Foundation
-import FlowBuildableSwiftMacro
 import SwuildCore
 
 public struct ExampleFlow: Flow {
@@ -23,4 +22,7 @@ public struct ExampleFlow: Flow {
     ]
 }
 
-#flowBuildable(ExampleFlow.self)
+@_cdecl("makeFlow")
+public func makeFlow() -> UnsafeMutableRawPointer {
+    flow { ExampleFlow() }
+}

@@ -32,12 +32,3 @@ To build this example, run:
 swift build
 ```
 
-## Using the FlowBuildableWithFactory Macro
-
-This example also demonstrates how to use the `#flowBuildableWithFactory` macro to automatically generate a flow builder for your flows:
-
-```swift
-#flowBuildableWithFactory(FlowBuilderExamples.self, "makeComplexFlow")
-```
-
-This macro generates the necessary code to make your flow loadable by the Swuild system.
