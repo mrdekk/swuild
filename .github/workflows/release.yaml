@@ -1,0 +1,40 @@
+name: Release Swuild
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Swift Version
+        run: swift --version
+
+      - name: Build Swuild
+        run: swift build --configuration release
+
+      - name: Get Result Swuild binary path
+        id: swuild_bin_path
+        run: |
+          echo "swuild_path=$(swift build --show-bin-path --configuration release)" >> $GITHUB_OUTPUT
+          echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create Release Archive
+        run: |
+          cd "${{ steps.swuild_bin_path.outputs.swuild_path }}"
+          tar -czf swuild-macos.tar.gz Swuild
+          echo "archive_path=${{ steps.swuild_bin_path.outputs.swuild_path }}/swuild-macos.tar.gz" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ steps.swuild_bin_path.outputs.swuild_path }}/swuild-macos.tar.gz
+          tag_name: ${{ steps.swuild_bin_path.outputs.tag_name }}
