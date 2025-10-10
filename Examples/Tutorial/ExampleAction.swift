@@ -25,6 +25,14 @@ public struct ExampleAction: Action {
 
     public func execute(context: Context) async throws -> Result<Void, Error> {
         print("Hello, \(greeting)! This is an example action")
+
+        print("Context values:")
+        for key in ["test1", "test2", "test3", "customKey"] {
+            if let value: String = context.get(for: key) {
+                print("  \(key) = \(value)")
+            }
+        }
+
         return .success(())
     }
 }

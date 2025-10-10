@@ -31,10 +31,36 @@ struct Run: AsyncParsableCommand {
     var printResultContext: Bool = false
 
     @ArgumentParser.Option(
+        name: .customLong("context-value"),
+        help: "Add a key-value pair to the context (can be used multiple times)"
+    )
+    var contextValues: [String] = []
+
+    @ArgumentParser.Option(
         name: .long,
         help: "Function name to create flow builder"
     )
     var functionName: String = "makeFlow"
+
+    /// Creates a context and populates it with values from command line options
+    /// - Returns: A new context with command line values added
+    private func createContext() throws -> Context {
+        let context = makeContext()
+
+        for contextValue in contextValues {
+            let parts = contextValue.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
+            if parts.count == 2 {
+                let key = String(parts[0])
+                let value = String(parts[1])
+                context.put(for: key, option: StringOption(defaultValue: value))
+            } else {
+                print("Invalid context value format: \(contextValue). Expected format: key=value")
+                throw ExitCode.failure
+            }
+        }
+
+        return context
+    }
 
     mutating func run() async throws {
         do {
@@ -44,7 +70,7 @@ struct Run: AsyncParsableCommand {
             print("  function name: \(functionName)")
             print("  print result context: \(printResultContext)")
 
-            let buildContext = makeContext()
+            let buildContext = try createContext()
             let buildFlow = RunFlow(productName: flowProductName, inputFolder: inputFolder)
             let buildResult = try await buildFlow.execute(context: buildContext)
             guard
@@ -59,7 +85,7 @@ struct Run: AsyncParsableCommand {
             let flowBuilder = try plugin.makeFlowBuilder(functionName: functionName)
             let flow = flowBuilder.build()
 
-            let context = makeContext()
+            let context = try createContext()
             let result = try await flow.execute(context: context)
 
             print("Result is \(result)")
