@@ -32,6 +32,7 @@ SwuildCore provides several predefined actions that you can use in your flows:
 5. **TarAction**: Creates and extracts tar archives.
 6. **ConditionalAction**: Executes an action only if a condition is met, with optional else action.
 7. **CallFlowAction**: Executes another flow.
+8. **CompositeAction**: Executes a series of actions in sequence.
 
 ### ConditionalAction
 
@@ -62,6 +63,19 @@ CallFlowAction(flow: BasicFlow(
 ) {
     EchoAction { .raw(arg: "This is a nested flow") }
 })
+```
+
+### CompositeAction
+
+The `CompositeAction` allows you to group multiple actions together and execute them sequentially as a single action. This is useful for organizing related actions or reusing common sequences of actions across different flows.
+
+Example usage:
+```swift
+CompositeAction(actions: [
+    EchoAction { .raw(arg: "First action in composite") },
+    ShellAction(command: "echo", arguments: [.raw(arg: "Second action in composite")]),
+    EchoAction { .raw(arg: "Third action in composite") }
+])
 ```
 
 You can define your actions as:

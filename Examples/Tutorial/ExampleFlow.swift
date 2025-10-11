@@ -32,6 +32,12 @@ public struct ExampleFlow: Flow {
             elseAction: EchoAction { .raw(arg: "Conditional action skipped, else action executed!") }
         ),
 
+        CompositeAction {
+            EchoAction { .raw(arg: "First action in composite") },
+            ShellAction(command: "echo", arguments: [.raw(arg: "Second action in composite")]),
+            EchoAction { .raw(arg: "Third action in composite") }
+        },
+
         CallFlowAction(flow: BasicFlow(
             name: "nested_flow_example",
             platforms: [.macOS(version: .any)],
