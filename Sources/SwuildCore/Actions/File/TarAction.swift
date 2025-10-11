@@ -32,10 +32,10 @@ public struct TarAction: Action {
     }
 
     public func execute(context: Context) async throws -> Result<Void, Error> {
-        guard let pathResolved = context.arg(path) else {
+        guard let pathResolved = try context.arg(path) else {
             throw ActionErrors.argumentNotResolved(name: "path")
         }
-        guard let tarPathResolved = context.arg(tarPath) else {
+        guard let tarPathResolved = try context.arg(tarPath) else {
             throw ActionErrors.argumentNotResolved(name: "tarPath")
         }
 

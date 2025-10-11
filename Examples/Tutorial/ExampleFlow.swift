@@ -19,6 +19,7 @@ public struct ExampleFlow: Flow {
         ShellAction(command: "ls", arguments: [.raw(arg: "-la")], captureOutputToKey: "listing"),
         EchoAction { .key(key: "listing") },
         ExampleAction(greeting: "World"),
+        EchoAction { .modified(key: "listing", modifier: { _, value in value + "AAAA" }) }
 
         ConditionalAction(
             predicate: { context in

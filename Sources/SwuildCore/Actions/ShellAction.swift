@@ -38,7 +38,7 @@ public struct ShellAction: Action {
     public func execute(context: Context) async throws -> Result<Void, Error> {
         do {
             let result = try sh(
-                command: [command] + arguments.compactMap { context.arg($0) },
+                command: [command] + arguments.compactMap { try context.arg($0) },
                 captureOutput: captureOutputToKey != nil,
                 currentDirectoryPath: workingDirectory
             )

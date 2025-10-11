@@ -38,14 +38,14 @@ public struct FileAction: Action {
         do {
             switch job {
             case let .makeDirectory(path, ensureCreated):
-                guard let resolvedPath = context.arg(path) else {
+                guard let resolvedPath = try context.arg(path) else {
                     throw Errors.pathIsNotFound
                 }
                 try await makeDirectory(path: resolvedPath, ensureCreated: ensureCreated)
 
             case let .copy(from, to):
-                guard let fromResolved = context.arg(from),
-                      let toResolved = context.arg(to)
+                guard let fromResolved = try context.arg(from),
+                      let toResolved = try context.arg(to)
                 else {
                     throw Errors.pathIsNotFound
                 }

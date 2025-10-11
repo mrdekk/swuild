@@ -34,7 +34,15 @@ public struct EchoAction: Action {
             if let value: String = context.get(for: key) {
                 print(value)
             } else {
-                print("<missing>")
+                print("<missing:\(key)>")
+            }
+
+        case let .modified(key, modifier):
+            if let value: String = context.get(for: key) {
+                let modified = try modifier(context, value)
+                print("unmodified: \(value), modified: \(modified)")
+            } else {
+                print("<missing:\(key):modified>")
             }
         }
         return .success(())
