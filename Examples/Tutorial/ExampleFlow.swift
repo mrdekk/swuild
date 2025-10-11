@@ -19,6 +19,27 @@ public struct ExampleFlow: Flow {
         ShellAction(command: "ls", arguments: [.raw(arg: "-la")], captureOutputToKey: "listing"),
         EchoAction { .key(key: "listing") },
         ExampleAction(greeting: "World"),
+
+        ConditionalAction(
+            predicate: { context in
+                // Check if a specific key exists in context with value "true"
+                if let value: String = context.get(for: "shouldRunConditional") {
+                    return value == "true"
+                }
+                return false
+            },
+            action: EchoAction { .raw(arg: "Conditional action executed!") },
+            elseAction: EchoAction { .raw(arg: "Conditional action skipped, else action executed!") }
+        ),
+
+        CallFlowAction(flow: BasicFlow(
+            name: "nested_flow_example",
+            platforms: [.macOS(version: .any)],
+            description: "A simple flow called from CallFlowAction"
+        ) {
+            EchoAction { .raw(arg: "This is a flow called from CallFlowAction") }
+            ShellAction(command: "echo", arguments: [.raw(arg: "Hello from nested flow")])
+        }),
     ]
 }
 

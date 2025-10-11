@@ -21,6 +21,49 @@ There are two main things in Swuild: Actions and Flows.
 
 For all definitions, you have to use the 'BuildsDefinitions' package. And for some predefined actions and flows, there are SwuildCore (very basic stuff) and other packages.
 
+## Predefined Actions in SwuildCore
+
+SwuildCore provides several predefined actions that you can use in your flows:
+
+1. **EchoAction**: Prints a message to the console. Can use either a raw string or a context key.
+2. **ShellAction**: Executes shell commands. Can capture output to a context key.
+3. **AdHocAction**: Allows you to define custom actions inline with a closure.
+4. **FileAction**: Provides file operations like copying, moving, and deleting.
+5. **TarAction**: Creates and extracts tar archives.
+6. **ConditionalAction**: Executes an action only if a condition is met, with optional else action.
+7. **CallFlowAction**: Executes another flow.
+
+### ConditionalAction
+
+The `ConditionalAction` allows you to conditionally execute actions based on a predicate function that takes a `Context` and returns a `Bool`. It also supports an optional `elseAction` that will be executed if the condition is false.
+
+Example usage:
+```swift
+ConditionalAction(
+    predicate: { context in
+        // Check if a specific key exists in context
+        return context.get(for: "shouldRun") != nil
+    },
+    action: EchoAction { .raw(arg: "Condition is true!") },
+    elseAction: EchoAction { .raw(arg: "Condition is false!") }
+)
+```
+
+### CallFlowAction
+
+The `CallFlowAction` allows you to execute another flow from within an action. This is useful for composing complex workflows from smaller, reusable flows.
+
+Example usage:
+```swift
+CallFlowAction(flow: BasicFlow(
+    name: "nested_flow",
+    platforms: [.macOS(version: .any)],
+    description: "A nested flow"
+) {
+    EchoAction { .raw(arg: "This is a nested flow") }
+})
+```
+
 You can define your actions as:
 
 ```swift
