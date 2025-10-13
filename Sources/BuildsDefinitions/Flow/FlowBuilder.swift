@@ -31,31 +31,41 @@ public func flow(_ buildable: @escaping () -> Flow) -> UnsafeMutableRawPointer {
 
 @resultBuilder
 public struct FlowActionsBuilder {
-    public static func buildBlock(_ components: [any Action]...) -> [any Action] {
-        return components.flatMap { $0 }
+    public static func buildBlock(_ components: (Context, Platform) -> [any Action]...) -> (Context, Platform) -> [any Action] {
+        return { context, platform in
+            components.flatMap { $0(context, platform) }
+        }
     }
 
-    public static func buildBlock() -> [any Action] {
-        return []
+    public static func buildBlock() -> (Context, Platform) -> [any Action] {
+        return { _, _ in [] }
     }
 
-    public static func buildOptional(_ component: [any Action]?) -> [any Action] {
-        return component ?? []
+    public static func buildOptional(_ component: ((Context, Platform) -> [any Action])?) -> (Context, Platform) -> [any Action] {
+        return { context, platform in
+            component?(context, platform) ?? []
+        }
     }
 
-    public static func buildEither(first component: [any Action]) -> [any Action] {
-        return component
+    public static func buildEither(first component: @escaping (Context, Platform) -> [any Action]) -> (Context, Platform) -> [any Action] {
+        return { context, platform in
+            component(context, platform)
+        }
     }
 
-    public static func buildEither(second component: [any Action]) -> [any Action] {
-        return component
+    public static func buildEither(second component: @escaping (Context, Platform) -> [any Action]) -> (Context, Platform) -> [any Action] {
+        return { context, platform in
+            component(context, platform)
+        }
     }
 
-    public static func buildArray(_ components: [[any Action]]) -> [any Action] {
-        return components.flatMap { $0 }
+    public static func buildArray(_ components: [(Context, Platform) -> [any Action]]) -> (Context, Platform) -> [any Action] {
+        return { context, platform in
+            components.flatMap { $0(context, platform) }
+        }
     }
 
-    public static func buildExpression(_ expression: any Action) -> [any Action] {
-        return [expression]
+    public static func buildExpression(_ expression: any Action) -> (Context, Platform) -> [any Action] {
+        return { _, _ in [expression] }
     }
 }

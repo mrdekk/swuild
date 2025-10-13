@@ -112,9 +112,11 @@ public struct <your name of flow>Flow: Flow {
 
     public let description = "<some human readable description of your flow>"
 
-    public let actions: [any Action] = [
-        <instantiate any actions you want to incorporate into this flow>
-    ]
+    public func actions(for context: Context, and platform: Platform) -> [any Action] {
+        return [
+            <instantiate any actions you want to incorporate into this flow>
+        ]
+    }
 }
 ```  
 

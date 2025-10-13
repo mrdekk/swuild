@@ -18,42 +18,44 @@ public struct SwuildPackFlow: Flow {
 
     public let description = "Special flow to pack Swuild Binary"
 
-    public let actions: [any Action] = [
-        EchoAction { .raw(arg: "Packing Swuild to release binary") },
-        SPMAction(
-            job: .build(
-                product: kSwuildProduct,
-                configuration: kReleaseConfiguration
+    public func actions(for context: Context, and platform: Platform) -> [any Action] {
+        return [
+            EchoAction { .raw(arg: "Packing Swuild to release binary") },
+            SPMAction(
+                job: .build(
+                    product: kSwuildProduct,
+                    configuration: kReleaseConfiguration
+                )
+            ),
+            SPMAction(
+                job: .gatherBinPath(
+                    product: kSwuildProduct,
+                    configuration: kReleaseConfiguration,
+                    toKey: kBinPathKey
+                )
+            ),
+            FileAction(
+                job: .makeDirectory(path: .raw(arg: kOutDirectory), ensureCreated: true)
+            ),
+            AdHocAction { context in
+                guard
+                    let binPath: String = context.get(for: kBinPathKey)
+                else {
+                    return .failure(Errors.binPathIsNotRetrieved)
+                }
+                let swuildBinaryPath = binPath + "/Swuild"
+                context.put(for: kSwuildBinaryPathKey, option: .init(defaultValue: swuildBinaryPath))
+                return .success(())
+            },
+            FileAction(
+                job: .copy(from: .key(key: kSwuildBinaryPathKey), to: .raw(arg: kOutDirectory))
+            ),
+            TarAction(
+                path: .raw(arg: kOutDirectory),
+                tarPath: .raw(arg: kOutTarPath)
             )
-        ),
-        SPMAction(
-            job: .gatherBinPath(
-                product: kSwuildProduct,
-                configuration: kReleaseConfiguration,
-                toKey: kBinPathKey
-            )
-        ),
-        FileAction(
-            job: .makeDirectory(path: .raw(arg: kOutDirectory), ensureCreated: true)
-        ),
-        AdHocAction { context in
-            guard
-                let binPath: String = context.get(for: kBinPathKey)
-            else {
-                return .failure(Errors.binPathIsNotRetrieved)
-            }
-            let swuildBinaryPath = binPath + "/Swuild"
-            context.put(for: kSwuildBinaryPathKey, option: .init(defaultValue: swuildBinaryPath))
-            return .success(())
-        },
-        FileAction(
-            job: .copy(from: .key(key: kSwuildBinaryPathKey), to: .raw(arg: kOutDirectory))
-        ),
-        TarAction(
-            path: .raw(arg: kOutDirectory),
-            tarPath: .raw(arg: kOutTarPath)
-        )
-    ]
+        ]
+    }
 }
 
 @_cdecl("makeFlow")

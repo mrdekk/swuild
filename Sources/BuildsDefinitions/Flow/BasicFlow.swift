@@ -4,21 +4,21 @@ public struct BasicFlow: Flow {
     public let name: String
     public let platforms: [Platform]
     public let description: String
-    private let _actions: [any Action]
+    private let actionsBuilder: (Context, Platform) -> [any Action]
 
-    public var actions: [any Action] {
-        return _actions
+    public func actions(for context: Context, and platform: Platform) -> [any Action] {
+        return actionsBuilder(context, platform)
     }
 
     public init(
         name: String,
         platforms: [Platform],
         description: String,
-        @FlowActionsBuilder actions: () -> [any Action]
+        @FlowActionsBuilder actions: @escaping (Context, Platform) -> [any Action]
     ) {
         self.name = name
         self.platforms = platforms
         self.description = description
-        self._actions = actions()
+        self.actionsBuilder = actions
     }
 }

@@ -113,8 +113,8 @@ private struct RunFlow: Flow {
 
     public let description = "Flow to run swuild flows"
 
-    public var actions: [any Action] {
-        [
+    public func actions(for context: Context, and platform: Platform) -> [any Action] {
+        return [
             SPMAction(job: .gatherPackageDump(toKey: kPackageDumpKey), workingDirectory: inputFolder),
             AdHocAction { context in
                 guard

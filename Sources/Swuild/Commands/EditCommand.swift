@@ -37,8 +37,8 @@ private struct EditFlow: Flow {
 
     public let description = "Just an example flow"
 
-    public var actions: [any Action] {
-        [
+    public func actions(for context: Context, and platform: Platform) -> [any Action] {
+        return [
             ShellAction(
                 command: "xcode-select",
                 arguments: [
