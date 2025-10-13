@@ -23,7 +23,7 @@ public struct ExampleAction: Action {
         true
     }
 
-    public func execute(context: Context) async throws -> Result<Void, Error> {
+    public func execute(context: Context, platform: Platform) async throws {
         print("Hello, \(greeting)! This is an example action")
 
         print("Context values:")
@@ -32,7 +32,5 @@ public struct ExampleAction: Action {
                 print("  \(key) = \(value)")
             }
         }
-
-        return .success(())
     }
 }

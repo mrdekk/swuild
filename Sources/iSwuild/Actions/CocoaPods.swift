@@ -51,11 +51,11 @@ public struct CocoaPods: Action {
         }
     }
     
-    public func execute(context: Context) async throws -> Result<Void, Error> {
+    public func execute(context: Context, platform: Platform) async throws {
         do {
             try sh(command: "pod", "--version", captureOutput: true)
         } catch {
-            return .failure(CocoaPods.Errors.cocoapodsNotInstalled)
+            throw CocoaPods.Errors.cocoapodsNotInstalled
         }
         
         let buildCommand = params.buildCommand()
@@ -72,12 +72,12 @@ public struct CocoaPods: Action {
             )
             
             if result.isSucceeded {
-                return .success(())
+                return
             }
 
             // If repo update is not already tried and it's enabled, try with --repo-update
             guard !params.repoUpdate && params.tryRepoUpdateOnError else {
-                return .failure(CocoaPods.Errors.executionFailed("CocoaPods failed with exit code \(result.exitStatus): \(result.standardError)"))
+                throw CocoaPods.Errors.executionFailed("CocoaPods failed with exit code \(result.exitStatus): \(result.standardError)")
             }
 
             let retryCommand = params.buildCommand(withRepoUpdate: true)
@@ -90,11 +90,11 @@ public struct CocoaPods: Action {
                 currentDirectoryPath: params.workingDirectory
             )
 
-            return retryResult.isSucceeded
-                ? .success(())
-                : .failure(CocoaPods.Errors.executionFailed("CocoaPods failed with exit code \(retryResult.exitStatus): \(retryResult.standardError)"))
+            if !retryResult.isSucceeded {
+                throw CocoaPods.Errors.executionFailed("CocoaPods failed with exit code \(retryResult.exitStatus): \(retryResult.standardError)")
+            }
         } catch {
-            return .failure(CocoaPods.Errors.executionFailed("Failed to execute CocoaPods: \(error)"))
+            throw CocoaPods.Errors.executionFailed("Failed to execute CocoaPods: \(error)")
         }
     }
 }

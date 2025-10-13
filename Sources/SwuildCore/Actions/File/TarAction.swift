@@ -31,7 +31,7 @@ public struct TarAction: Action {
         self.workingDirectory = workingDirectory
     }
 
-    public func execute(context: Context) async throws -> Result<Void, Error> {
+    public func execute(context: Context, platform: Platform) async throws {
         guard let pathResolved = try context.arg(path) else {
             throw ActionErrors.argumentNotResolved(name: "path")
         }
@@ -55,7 +55,5 @@ public struct TarAction: Action {
             command: "tar", "-cvf", tarPathResolved, "-C", "\(workingDirectory)/\(pathResolved)", ".",
             currentDirectoryPath: workingDirectory
         )
-
-        return .success(())
     }
 }

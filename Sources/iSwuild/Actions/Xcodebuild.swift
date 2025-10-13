@@ -51,9 +51,9 @@ public struct Xcodebuild: Action {
         }
     }
     
-    public func execute(context: Context) async throws -> Result<Void, Error> {
+    public func execute(context: Context, platform: Platform) async throws {
         guard params.project.workspace != nil || params.project.project != nil else {
-            return .failure(Xcodebuild.Errors.missingRequiredParameter("Either workspace or project must be specified"))
+            throw Xcodebuild.Errors.missingRequiredParameter("Either workspace or project must be specified")
         }
         
         let buildCommand = params.buildCommand()
@@ -69,21 +69,15 @@ public struct Xcodebuild: Action {
             )
             
             if !result.isSucceeded {
-                return .failure(Xcodebuild.Errors.executionFailed("xcodebuild failed with exit code \(result.exitStatus): \(result.standardError)"))
+                throw Xcodebuild.Errors.executionFailed("xcodebuild failed with exit code \(result.exitStatus): \(result.standardError)")
             }
             
             if params.archive.skipArchive != true && params.export.skipPackageIpa != true {
-                do {
-                    try await exportArchive()
-                } catch {
-                    return .failure(error)
-                }
+                try await exportArchive()
             }
         } catch {
-            return .failure(Xcodebuild.Errors.executionFailed("Failed to execute xcodebuild: \(error)"))
+            throw Xcodebuild.Errors.executionFailed("Failed to execute xcodebuild: \(error)")
         }
-        
-        return .success(())
     }
 
     // MARK: - Private Methods

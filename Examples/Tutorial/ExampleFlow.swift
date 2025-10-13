@@ -22,15 +22,21 @@ public struct ExampleFlow: Flow {
             ExampleAction(greeting: "World"),
             EchoAction { .modified(key: "listing", modifier: { _, value in value + "AAAA" }) },
 
-            if let value: String = context.get(for: "shouldRunConditional"), value == "true" {
-                EchoAction { .raw(arg: "Conditional action executed") }
-            } else {
-                EchoAction { .raw(arg: "Conditional action skipped") }
-            },
+            ConditionalAction(
+                predicate: { context, platform in
+                    return if let value: String = context.get(for: "shouldRunConditional"), value == "true" {
+                        true
+                    } else {
+                        false
+                    }
+                },
+                action: EchoAction { .raw(arg: "Conditional action executed") },
+                elseAction: EchoAction { .raw(arg: "Conditional action skipped") }
+            ),
 
-            CompositeAction {
-                EchoAction { .raw(arg: "First action in composite") },
-                ShellAction(command: "echo", arguments: [.raw(arg: "Second action in composite")]),
+            CompositeAction { context, platform in
+                EchoAction { .raw(arg: "First action in composite") }
+                ShellAction(command: "echo", arguments: [.raw(arg: "Second action in composite")])
                 EchoAction { .raw(arg: "Third action in composite") }
             },
 
@@ -39,10 +45,8 @@ public struct ExampleFlow: Flow {
                 platforms: [.macOS(version: .any)],
                 description: "A simple flow called from CallFlowAction"
             ) { context, platform in
-                [
-                    EchoAction { .raw(arg: "This is a flow called from CallFlowAction") },
-                    ShellAction(command: "echo", arguments: [.raw(arg: "Hello from nested flow")])
-                ]
+                EchoAction { .raw(arg: "This is a flow called from CallFlowAction") }
+                ShellAction(command: "echo", arguments: [.raw(arg: "Hello from nested flow")])
             }),
         ]
     }

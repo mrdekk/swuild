@@ -37,15 +37,14 @@ public struct SwuildPackFlow: Flow {
             FileAction(
                 job: .makeDirectory(path: .raw(arg: kOutDirectory), ensureCreated: true)
             ),
-            AdHocAction { context in
+            AdHocAction { context, platform in
                 guard
                     let binPath: String = context.get(for: kBinPathKey)
                 else {
-                    return .failure(Errors.binPathIsNotRetrieved)
+                    throw Errors.binPathIsNotRetrieved
                 }
                 let swuildBinaryPath = binPath + "/Swuild"
                 context.put(for: kSwuildBinaryPathKey, option: .init(defaultValue: swuildBinaryPath))
-                return .success(())
             },
             FileAction(
                 job: .copy(from: .key(key: kSwuildBinaryPathKey), to: .raw(arg: kOutDirectory))

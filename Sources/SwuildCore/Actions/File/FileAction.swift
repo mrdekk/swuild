@@ -34,7 +34,7 @@ public struct FileAction: Action {
         self.workingDirectory = workingDirectory
     }
 
-    public func execute(context: Context) async throws -> Result<Void, Error> {
+    public func execute(context: Context, platform: Platform) async throws {
         do {
             switch job {
             case let .makeDirectory(path, ensureCreated):
@@ -51,7 +51,6 @@ public struct FileAction: Action {
                 }
                 try await copy(from: fromResolved, to: toResolved)
             }
-            return .success(())
         } catch {
             throw error
         }

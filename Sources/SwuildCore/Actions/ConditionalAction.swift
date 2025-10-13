@@ -4,8 +4,8 @@ import Foundation
 import BuildsDefinitions
 
 public struct ConditionalAction: Action {
-    public typealias Predicate = (_ context: Context) -> Bool
-    
+    public typealias Predicate = (_ context: Context, _ platform: Platform) -> Bool
+
     public static let name = "conditional"
     public static let description = "Executes an action only if a condition is met, with optional else action"
     public static let authors = Author.defaultAuthors
@@ -24,13 +24,11 @@ public struct ConditionalAction: Action {
         true
     }
     
-    public func execute(context: Context) async throws -> Result<Void, Error> {
-        if predicate(context) {
-            return try await action.execute(context: context)
+    public func execute(context: Context, platform: Platform) async throws {
+        if predicate(context, platform) {
+            return try await action.execute(context: context, platform: platform)
         } else if let elseAction = elseAction {
-            return try await elseAction.execute(context: context)
+            return try await elseAction.execute(context: context, platform: platform)
         }
-        
-        return .success(())
     }
 }

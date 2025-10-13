@@ -46,18 +46,17 @@ private struct EditFlow: Flow {
                 ],
                 captureOutputToKey: kXcodePathKey
             ),
-            AdHocAction { context in
+            AdHocAction { context, _ in
                 guard
                     let path: String = context.get(for: kXcodePathKey),
                     path.hasSuffix(kContentsDeveloperSuffix)
                 else {
-                    return .failure(EditErrors.invalidXcodePath(message: "not valid path"))
+                    throw EditErrors.invalidXcodePath(message: "not valid path")
                 }
                 context.put(
                     for: kXcodePathKey,
                     option: StringOption(defaultValue: String(path.dropLast(kContentsDeveloperSuffix.count)))
                 )
-                return .success(())
             },
             ShellAction(
                 command: "open",

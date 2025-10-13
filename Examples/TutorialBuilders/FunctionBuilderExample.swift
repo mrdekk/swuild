@@ -12,7 +12,7 @@ public enum FlowBuilderExamples {
             name: "basic_flow_example",
             platforms: [.macOS(version: .any)],
             description: "A basic flow example using function builder"
-        ) {
+        ) { _, _ in
             EchoAction { .raw(arg: "Hello from function builder!") }
             ShellAction(command: "echo", arguments: [.raw(arg: "Simple command")])
         }
@@ -23,7 +23,7 @@ public enum FlowBuilderExamples {
             name: "simple_flow",
             platforms: [.macOS(version: .any)],
             description: "A simple flow example using function builder"
-        ) {
+        ) { _, _ in
             EchoAction { .raw(arg: "Hello from function builder!") }
             ShellAction(command: "echo", arguments: [.raw(arg: "Simple command")])
         }
@@ -34,13 +34,10 @@ public enum FlowBuilderExamples {
             name: "conditional_flow",
             platforms: [.macOS(version: .any)],
             description: "A flow with conditional actions"
-        ) {
+        ) { context, _ in
             EchoAction { .raw(arg: "Starting conditional flow") }
             
-            // Use a fixed value instead of parameter
-            let shouldListFiles = true
-            
-            if shouldListFiles {
+            if let value: String = context.get(for: "shouldListFiles"), value == "true" {
                 ShellAction(
                     command: "ls",
                     arguments: [.raw(arg: "-la")],
@@ -60,7 +57,7 @@ public enum FlowBuilderExamples {
             name: "batch_flow",
             platforms: [.macOS(version: .any)],
             description: "A flow that executes a batch of commands"
-        ) {
+        ) { _, _ in
             EchoAction { .raw(arg: "Starting batch flow") }
             
             // Use fixed test commands instead of parameter
@@ -79,7 +76,7 @@ public enum FlowBuilderExamples {
             name: "complex_flow",
             platforms: [.macOS(version: .any), .iOS(version: .any)],
             description: "A complex flow demonstrating various function builder features"
-        ) {
+        ) { _, _ in
             // Simple actions
             EchoAction { .raw(arg: "Starting complex flow") }
             
@@ -112,7 +109,7 @@ public enum FlowBuilderExamples {
             name: "nested_conditions_flow",
             platforms: [.macOS(version: .any)],
             description: "A flow with nested conditional actions"
-        ) {
+        ) { _, _ in
             EchoAction { .raw(arg: "Starting nested conditions flow") }
             
             #if os(macOS)

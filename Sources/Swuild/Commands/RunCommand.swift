@@ -72,12 +72,12 @@ struct Run: AsyncParsableCommand {
 
             let buildContext = try createContext()
             let buildFlow = RunFlow(productName: flowProductName, inputFolder: inputFolder)
-            let buildResult = try await buildFlow.execute(context: buildContext)
-            guard
-                case .success = buildResult,
-                let flowPlugingPath: String = buildContext.get(for: kFlowPluginKey)
-            else {
-                throw PackageBuilderErrors.genericBuildError(message: "build flow execution failure: \(buildResult)")
+            try await buildFlow.execute(context: buildContext)
+
+            guard let flowPlugingPath: String = buildContext.get(for: kFlowPluginKey) else {
+                throw PackageBuilderErrors.genericBuildError(
+                    message: "build flow execution failure, no \(kFlowPluginKey) key"
+                )
             }
 
             let plugin = Plugin(path: flowPlugingPath)
@@ -86,9 +86,10 @@ struct Run: AsyncParsableCommand {
             let flow = flowBuilder.build()
 
             let context = try createContext()
-            let result = try await flow.execute(context: context)
+            try await flow.execute(context: context)
 
-            print("Result is \(result)")
+            print("Flow executed successfully is")
+
             if printResultContext, let impl = context as? ContextPrintable {
                 impl.printContext()
             }
@@ -116,14 +117,13 @@ private struct RunFlow: Flow {
     public func actions(for context: Context, and platform: Platform) -> [any Action] {
         return [
             SPMAction(job: .gatherPackageDump(toKey: kPackageDumpKey), workingDirectory: inputFolder),
-            AdHocAction { context in
+            AdHocAction { context, _ in
                 guard
                     let dump: PackageDump = context.get(for: kPackageDumpKey),
                     dump.products.contains(where: { $0.name == productName })
                 else {
-                    return .failure(PackageBuilderErrors.noSuchProductDefinition)
+                    throw PackageBuilderErrors.noSuchProductDefinition
                 }
-                return .success(())
             },
             SPMAction(
                 job: .gatherBinPath(
@@ -140,22 +140,21 @@ private struct RunFlow: Flow {
                 ),
                 workingDirectory: inputFolder
             ),
-            AdHocAction { context in
+            AdHocAction { context, _ in
                 guard let binPath: String = context.get(for: kBinPathKey) else {
-                    return .failure(PackageBuilderErrors.binaryProductMissing)
+                    throw PackageBuilderErrors.binaryProductMissing
                 }
                 let rs = try FileManager.default.contentsOfDirectory(atPath: binPath)
                     .filter { $0.hasSuffix(".dylib") && $0.contains(productName) }
 
                 guard let binName = rs.first else {
-                    return .failure(PackageBuilderErrors.binaryProductMissing)
+                    throw PackageBuilderErrors.binaryProductMissing
                 }
 
                 context.put(
                     for: kFlowPluginKey,
                     option: StringOption(defaultValue: [binPath, binName].joined(separator: "/"))
                 )
-                return .success(())
             }
         ]
     }

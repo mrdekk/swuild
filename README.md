@@ -41,7 +41,7 @@ The `ConditionalAction` allows you to conditionally execute actions based on a p
 Example usage:
 ```swift
 ConditionalAction(
-    predicate: { context in
+    predicate: { context, platform in
         // Check if a specific key exists in context
         return context.get(for: "shouldRun") != nil
     },
@@ -60,7 +60,7 @@ CallFlowAction(flow: BasicFlow(
     name: "nested_flow",
     platforms: [.macOS(version: .any)],
     description: "A nested flow"
-) {
+) { _, _ in
     EchoAction { .raw(arg: "This is a nested flow") }
 })
 ```
@@ -71,11 +71,11 @@ The `CompositeAction` allows you to group multiple actions together and execute 
 
 Example usage:
 ```swift
-CompositeAction(actions: [
+CompositeAction { _, _ in
     EchoAction { .raw(arg: "First action in composite") },
     ShellAction(command: "echo", arguments: [.raw(arg: "Second action in composite")]),
     EchoAction { .raw(arg: "Third action in composite") }
-])
+}
 ```
 
 You can define your actions as:
@@ -95,7 +95,7 @@ public struct <your name of action>Action: Action {
         <predicate to check if this action is supported on this platform>
     }
 
-    public func execute(context: Context) async throws -> Result<Void, Error> {
+    public func execute(context: Context, platform: Platform) async throws {
         <your action execution code>
     }
 }
@@ -145,12 +145,12 @@ let flow = BasicFlow(
     name: "example_flow",
     platforms: [.macOS(version: .any)],
     description: "An example flow using function builder"
-) {
+) { _, _ in
     EchoAction { .raw(arg: "Hello from function builder!") }
     ShellAction(command: "echo", arguments: [.raw(arg: "Simple command")])
     
     // Conditional actions
-    if shouldListFiles {
+    if let value: String = context.get(for: "shouldListFiles"), value == "true" {
         ShellAction(
             command: "ls",
             arguments: [.raw(arg: "-la")],

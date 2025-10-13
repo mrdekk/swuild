@@ -25,7 +25,7 @@ public struct EchoAction: Action {
         self.init(contentProvider: { .raw(arg: content) })
     }
 
-    public func execute(context: Context) async throws -> Result<Void, Error> {
+    public func execute(context: Context, platform: Platform) async throws {
         switch contentProvider() {
         case let .raw(message):
             print(message)
@@ -45,6 +45,5 @@ public struct EchoAction: Action {
                 print("<missing:\(key):modified>")
             }
         }
-        return .success(())
     }
 }

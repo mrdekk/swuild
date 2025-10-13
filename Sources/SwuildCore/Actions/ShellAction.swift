@@ -35,7 +35,7 @@ public struct ShellAction: Action {
         self.workingDirectory = workingDirectory
     }
 
-    public func execute(context: Context) async throws -> Result<Void, Error> {
+    public func execute(context: Context, platform: Platform) async throws {
         do {
             let result = try sh(
                 command: [command] + arguments.compactMap { try context.arg($0) },
@@ -45,7 +45,6 @@ public struct ShellAction: Action {
             if let key = captureOutputToKey {
                 context.put(for: key, option: StringOption(defaultValue: result.standardOutput))
             }
-            return .success(())
         } catch {
             throw ShellActionErrors.internalShellError(cause: error)
         }

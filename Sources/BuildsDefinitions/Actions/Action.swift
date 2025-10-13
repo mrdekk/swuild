@@ -20,5 +20,5 @@ public protocol Action: ContextExecutable {
     /// Execute the action with the given context
     /// - Parameter context: The context in which to execute the action
     /// - Returns: A result indicating success or failure
-    func execute(context: Context) async throws -> Result<Void, Error>
+    func execute(context: Context, platform: Platform) async throws
 }

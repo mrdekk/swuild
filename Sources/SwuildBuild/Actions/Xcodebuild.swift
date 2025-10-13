@@ -57,7 +57,8 @@ public struct Xcodebuild: Action {
         }
     }
 
-    public func execute(context: Context) async throws -> Result<Void, Error> {
-        return .success(())
+    public func execute(context: Context, platform: Platform) async throws {
+        // TODO: Implement xcodebuild execution
+        // For now, just return successfully
     }
 }

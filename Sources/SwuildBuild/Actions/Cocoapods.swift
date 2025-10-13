@@ -44,7 +44,7 @@ public struct Cocoapods: Action {
         }
     }
 
-    public func execute(context: Context) async throws -> Result<Void, Error> {
+    public func execute(context: Context, platform: Platform) async throws {
         var cmd = [String]()
         
         if useBundler {
@@ -67,13 +67,11 @@ public struct Cocoapods: Action {
                 captureOutput: true,
                 currentDirectoryPath: workingDirectory
             )
-            if result.isSucceeded {
-                return .success(())
-            } else {
-                return .failure(Errors.cocoapodsFailed(output: result.standardError))
+            if !result.isSucceeded {
+                throw Errors.cocoapodsFailed(output: result.standardError)
             }
         } catch {
-            return .failure(error)
+            throw error
         }
     }
 }

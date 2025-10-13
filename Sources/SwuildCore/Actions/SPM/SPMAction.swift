@@ -31,7 +31,7 @@ public struct SPMAction: Action {
         self.workingDirectory = workingDirectory
     }
 
-    public func execute(context: Context) async throws -> Result<Void, Error> {
+    public func execute(context: Context, platform: Platform) async throws {
         do {
             switch job {
             case let .build(product, configuration):
@@ -45,7 +45,6 @@ public struct SPMAction: Action {
                 let dump = try await gatherPackageDump()
                 context.put(for: toKey, option: PackageDumpOption(defaultValue: dump))
             }
-            return .success(())
         } catch {
             throw error
         }

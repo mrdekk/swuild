@@ -4,8 +4,7 @@ import Foundation
 import BuildsDefinitions
 
 public struct AdHocAction: Action {
-
-    public typealias AdHocAction = (_ context: Context) async throws -> Result<Void, Error>
+    public typealias AdHocAction = (_ context: Context, _ platform: Platform) async throws -> Void
 
     public static let name = "adhoc"
     public static let description = "Adhoc action to plug into flow"
@@ -21,7 +20,7 @@ public struct AdHocAction: Action {
         self.action = action
     }
 
-    public func execute(context: Context) async throws -> Result<Void, Error> {
-        return try await action(context)
+    public func execute(context: Context, platform: Platform) async throws {
+        try await action(context, platform)
     }
 }

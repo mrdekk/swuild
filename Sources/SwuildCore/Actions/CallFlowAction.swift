@@ -18,7 +18,7 @@ public struct CallFlowAction: Action {
         true
     }
     
-    public func execute(context: Context) async throws -> Result<Void, Error> {
-        return try await flow.execute(context: context)
+    public func execute(context: Context, platform: Platform) async throws {
+        try await flow.execute(context: context, platform: platform)
     }
 }

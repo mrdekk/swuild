@@ -15,27 +15,20 @@ public protocol Flow: ContextExecutable {
 }
 
 public extension Flow {
-    func execute(context: Context) async throws -> Result<Void, Error> {
-        do {
-            for platform in platforms {
-                let actions = actions(for: context, and: platform)
-                for action in actions {
-                    guard type(of: action).isSupported(for: platform) else {
-                        continue
-                    }
-
-                    let result = try await action.execute(context: context)
-                    switch result {
-                    case .success:
-                        break
-                    case let .failure(error):
-                        throw FlowErrors.actionExecution(cause: error)
-                    }
-                }
+    func execute(context: Context, platform: Platform) async throws {
+        let actions = actions(for: context, and: platform)
+        for action in actions {
+            guard type(of: action).isSupported(for: platform) else {
+                continue
             }
-            return .success(())
-        } catch {
-            return .failure(FlowErrors.actionExecution(cause: error))
+
+            try await action.execute(context: context, platform: platform)
+        }
+    }
+
+    func execute(context: Context) async throws {
+        for platform in platforms {
+            try await execute(context: context, platform: platform)
         }
     }
 }

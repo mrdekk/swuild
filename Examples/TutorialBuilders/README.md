@@ -19,8 +19,8 @@ The `FlowBuilderExamples` enum contains several examples of how to use the funct
 
 - `makeExample()`: A basic flow example
 - `makeSimpleFlow()`: A simple flow example
-- `makeConditionalFlow(shouldListFiles:)`: A flow with conditional actions
-- `makeBatchFlow(commands:)`: A flow that executes a batch of commands
+- `makeConditionalFlow()`: A flow with conditional actions
+- `makeBatchFlow()`: A flow that executes a batch of commands
 - `makeComplexFlow()`: A complex flow demonstrating various function builder features
 - `makeNestedConditionsFlow()`: A flow with nested conditional actions
 

@@ -8,30 +8,24 @@ public struct CompositeAction: Action {
     public static let description = "Executes a series of actions in sequence"
     public static let authors = Author.defaultAuthors
     
-    private let _actions: [any Action]
+    private let actionsBuilder: (Context, Platform) -> [any Action]
 
-    public init(actions: [any Action]) {
-        self._actions = actions
+    public func actions(for context: Context, and platform: Platform) -> [any Action] {
+        return actionsBuilder(context, platform)
     }
 
-    public init(@FlowActionsBuilder actions: () -> [any Action]) {
-        self._actions = actions()
+    public init(@FlowActionsBuilder actions: @escaping (Context, Platform) -> [any Action]) {
+        self.actionsBuilder = actions
     }
 
     public static func isSupported(for platform: Platform) -> Bool {
         true
     }
     
-    public func execute(context: Context) async throws -> Result<Void, Error> {
-        for action in _actions {
-            let result = try await action.execute(context: context)
-            switch result {
-            case .success:
-                continue
-            case .failure(let error):
-                return .failure(error)
-            }
+    public func execute(context: Context, platform: Platform) async throws {
+        let actions = actions(for: context, and: platform)
+        for action in actions {
+            try await action.execute(context: context, platform: platform)
         }
-        return .success(())
     }
 }
