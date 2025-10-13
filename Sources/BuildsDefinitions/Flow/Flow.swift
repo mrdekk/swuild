@@ -18,7 +18,9 @@ public extension Flow {
     func execute(context: Context, platform: Platform) async throws {
         let actions = try actions(for: context, and: platform)
         for action in actions {
+            print("⚡️ Executing \(type(of: action).name) action...")
             guard type(of: action).isSupported(for: platform) else {
+                print("❗️ Action \(type(of: action).name) is not supported for \(platform), skipping!")
                 continue
             }
 
@@ -27,7 +29,9 @@ public extension Flow {
     }
 
     func execute(context: Context) async throws {
+        print("⚡️ Executing \(name) flow...")
         for platform in platforms {
+            print("⚡️ Executing \(name) flow on platform \(platform)...")
             try await execute(context: context, platform: platform)
         }
     }

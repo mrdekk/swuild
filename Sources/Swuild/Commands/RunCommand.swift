@@ -76,7 +76,7 @@ struct Run: AsyncParsableCommand {
 
             guard let flowPlugingPath: String = buildContext.get(for: kFlowPluginKey) else {
                 throw PackageBuilderErrors.genericBuildError(
-                    message: "build flow execution failure, no \(kFlowPluginKey) key"
+                    message: "❌ build flow execution failure, no \(kFlowPluginKey) key"
                 )
             }
 
@@ -88,13 +88,13 @@ struct Run: AsyncParsableCommand {
             let context = try createContext()
             try await flow.execute(context: context)
 
-            print("Flow executed successfully is")
+            print("✅ Flow executed successfully is")
 
             if printResultContext, let impl = context as? ContextPrintable {
                 impl.printContext()
             }
         } catch {
-            print("Error is \(error)")
+            print("⚠️ Error is \(error)")
         }
     }
 }
