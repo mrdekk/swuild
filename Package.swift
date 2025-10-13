@@ -48,14 +48,6 @@ let package = Package(
             path: "Sources/SwuildCore"
         ),
         .target(
-            name: "SwuildBuild",
-            dependencies: [
-                .byName(name: "BuildsDefinitions"),
-                .byName(name: "SwuildUtils"),
-            ],
-            path: "Sources/SwuildBuild"
-        ),
-        .target(
             name: "SwuildPack",
             dependencies: [
                 .byName(name: "BuildsDefinitions"),
