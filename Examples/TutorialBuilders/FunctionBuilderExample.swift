@@ -6,7 +6,21 @@ import SwuildCore
 
 // MARK: - Usage Examples
 
+public enum SampleErrors: Error {
+    case oops
+}
+
 public enum FlowBuilderExamples {
+    public static func makeThrowingFlow() -> some Flow {
+        return BasicFlow(
+            name: "throwing_flow",
+            platforms: [.macOS(version: .any)],
+            description: "A basic throwing flow",
+        ) { _, _ in
+            throw SampleErrors.oops
+        }
+    }
+
     public static func makeExample() -> some Flow {
         return BasicFlow(
             name: "basic_flow_example",

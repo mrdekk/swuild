@@ -6,6 +6,11 @@ import SwuildCore
 
 // MARK: - Tutorial Flow with Function Builder
 
+@_cdecl("makeThrowingFlow")
+public func makeThrowingFlow() -> UnsafeMutableRawPointer {
+    flow { FlowBuilderExamples.makeThrowingFlow() }
+}
+
 @_cdecl("makeExample")
 public func makeExample() -> UnsafeMutableRawPointer {
     flow { FlowBuilderExamples.makeExample() }

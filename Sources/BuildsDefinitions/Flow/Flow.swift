@@ -11,12 +11,12 @@ public protocol Flow: ContextExecutable {
     var platforms: [Platform] { get }
     var description: String { get }
 
-    func actions(for context: Context, and platform: Platform) -> [any Action]
+    func actions(for context: Context, and platform: Platform) throws -> [any Action]
 }
 
 public extension Flow {
     func execute(context: Context, platform: Platform) async throws {
-        let actions = actions(for: context, and: platform)
+        let actions = try actions(for: context, and: platform)
         for action in actions {
             guard type(of: action).isSupported(for: platform) else {
                 continue
