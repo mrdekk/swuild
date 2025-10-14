@@ -19,6 +19,16 @@ public struct ExampleFlow: Flow {
             EchoAction(hint: "Print welcome message", contentProvider: { .raw(arg: "Just and Echo") }),
             ShellAction(hint: "List directory contents", command: "ls", arguments: [.raw(arg: "-la")], captureOutputToKey: "listing"),
             EchoAction(hint: "Display directory listing", contentProvider: { .key(key: "listing") }),
+
+            ShellAction(
+                hint: "Echo with console output",
+                command: "echo",
+                arguments: [.raw(arg: "This message appears in console and is captured")],
+                captureOutputToKey: "console_output",
+                outputToConsole: true
+            ),
+            EchoAction(hint: "Display console output", contentProvider: { .key(key: "console_output") }),
+
             ExampleAction(hint: "Run example action", greeting: "World"),
             EchoAction(hint: "Display modified listing", contentProvider: { .modified(key: "listing", modifier: { _, value in value + "AAAA" }) }),
 

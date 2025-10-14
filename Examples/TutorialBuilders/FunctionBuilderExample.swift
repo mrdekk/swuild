@@ -28,7 +28,7 @@ public enum FlowBuilderExamples {
             description: "A basic flow example using function builder"
         ) { _, _ in
             EchoAction(hint: "Greeting from function builder", contentProvider: { .raw(arg: "Hello from function builder!") })
-            ShellAction(hint: "Execute simple command", command: "echo", arguments: [.raw(arg: "Simple command")])
+            ShellAction(hint: "Execute simple command", command: "echo", arguments: [.raw(arg: "Simple command")], outputToConsole: true)
         }
     }
 
@@ -39,7 +39,7 @@ public enum FlowBuilderExamples {
             description: "A simple flow example using function builder"
         ) { _, _ in
             EchoAction(hint: "Greeting from function builder", contentProvider: { .raw(arg: "Hello from function builder!") })
-            ShellAction(hint: "Execute simple command", command: "echo", arguments: [.raw(arg: "Simple command")])
+            ShellAction(hint: "Execute simple command", command: "echo", arguments: [.raw(arg: "Simple command")], outputToConsole: true)
         }
     }
     
@@ -56,7 +56,8 @@ public enum FlowBuilderExamples {
                     hint: "List directory contents",
                     command: "ls",
                     arguments: [.raw(arg: "-la")],
-                    captureOutputToKey: "listing"
+                    captureOutputToKey: "listing",
+                    outputToConsole: true
                 )
                 EchoAction(hint: "Display directory listing", contentProvider: { .key(key: "listing") })
             } else {
@@ -79,7 +80,7 @@ public enum FlowBuilderExamples {
             let commands = ["echo Hello", "echo World", "ls -la"]
             
             for (index, command) in commands.enumerated() {
-                ShellAction(hint: "Execute command \(index + 1)", command: command)
+                ShellAction(hint: "Execute command \(index + 1)", command: command, outputToConsole: true)
             }
             
             EchoAction(hint: "Complete batch flow", contentProvider: { .raw(arg: "Batch flow completed") })
@@ -97,12 +98,12 @@ public enum FlowBuilderExamples {
             
             // Conditional actions based on platform
             #if os(macOS)
-            ShellAction(hint: "Get system information", command: "uname", arguments: [.raw(arg: "-a")], captureOutputToKey: "system_info")
+            ShellAction(hint: "Get system information", command: "uname", arguments: [.raw(arg: "-a")], captureOutputToKey: "system_info", outputToConsole: true)
             EchoAction(hint: "Display system information", contentProvider: { .key(key: "system_info") })
             #endif
             
             // Multiple actions in sequence
-            ShellAction(hint: "Get current directory", command: "pwd", captureOutputToKey: "current_dir")
+            ShellAction(hint: "Get current directory", command: "pwd", captureOutputToKey: "current_dir", outputToConsole: true)
             EchoAction(hint: "Display current directory", contentProvider: { .key(key: "current_dir") })
             
             // Conditional actions
@@ -129,7 +130,7 @@ public enum FlowBuilderExamples {
             
             #if os(macOS)
             if true {
-                ShellAction(hint: "Echo on macOS", command: "echo", arguments: [.raw(arg: "On macOS and condition is true")])
+                ShellAction(hint: "Echo on macOS", command: "echo", arguments: [.raw(arg: "On macOS and condition is true")], outputToConsole: true)
                 
                 for i in 1...2 {
                     if i == 1 {

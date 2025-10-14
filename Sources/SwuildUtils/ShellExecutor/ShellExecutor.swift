@@ -20,12 +20,14 @@ public class ShellExecutor {
     public let command: String
     public let arguments: [String]
     public let captureOutput: Bool
+    public let outputToConsole: Bool
     public let currentDirectoryPath: String?
 
-    public init(command: String, arguments: [String], captureOutput: Bool, currentDirectoryPath: String? = nil) {
+    public init(command: String, arguments: [String], captureOutput: Bool, outputToConsole: Bool = false, currentDirectoryPath: String? = nil) {
         self.command = command
         self.arguments = arguments
         self.captureOutput = captureOutput
+        self.outputToConsole = outputToConsole
         self.currentDirectoryPath = currentDirectoryPath
     }
 
@@ -43,18 +45,90 @@ public class ShellExecutor {
         var stdoutFileHandle: FileHandle?
         var stderrFileHandle: FileHandle?
 
-        if captureOutput {
-            let stdoutFile = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-            stdoutFileURL = stdoutFile
-            FileManager.default.createFile(atPath: stdoutFile.path, contents: nil, attributes: nil)
-            stdoutFileHandle = try? FileHandle(forWritingTo: stdoutFile)
-            process.standardOutput = stdoutFileHandle
+        let stdoutPipe = outputToConsole ? Pipe() : nil
+        let stderrPipe = outputToConsole ? Pipe() : nil
 
-            let stderrFile = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-            stderrFileURL = stderrFile
-            FileManager.default.createFile(atPath: stderrFile.path, contents: nil, attributes: nil)
-            stderrFileHandle = try? FileHandle(forWritingTo: stderrFile)
-            process.standardError = stderrFileHandle
+        if captureOutput || outputToConsole {
+            if captureOutput {
+                let stdoutFile = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+                stdoutFileURL = stdoutFile
+                FileManager.default.createFile(atPath: stdoutFile.path, contents: nil, attributes: nil)
+                stdoutFileHandle = try? FileHandle(forWritingTo: stdoutFile)
+
+                let stderrFile = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+                stderrFileURL = stderrFile
+                FileManager.default.createFile(atPath: stderrFile.path, contents: nil, attributes: nil)
+                stderrFileHandle = try? FileHandle(forWritingTo: stderrFile)
+            }
+
+            if outputToConsole {
+                if captureOutput {
+                    if let stdoutPipe = stdoutPipe, let stdoutFileHandle = stdoutFileHandle {
+                        stdoutPipe.fileHandleForReading.readabilityHandler = { handle in
+                            let data = handle.availableData
+                            if !data.isEmpty {
+                                // Write to file
+                                if #available(macOS 10.15.4, *) {
+                                    try? stdoutFileHandle.write(contentsOf: data)
+                                } else {
+                                    stdoutFileHandle.write(data)
+                                }
+
+                                if let output = String(data: data, encoding: .utf8) {
+                                    print(output, terminator: "")
+                                }
+                            }
+                        }
+                        process.standardOutput = stdoutPipe
+                    }
+
+                    if let stderrPipe = stderrPipe, let stderrFileHandle = stderrFileHandle {
+                        stderrPipe.fileHandleForReading.readabilityHandler = { handle in
+                            let data = handle.availableData
+                            if !data.isEmpty {
+                                // Write to file
+                                if #available(macOS 10.15.4, *) {
+                                    try? stderrFileHandle.write(contentsOf: data)
+                                } else {
+                                    stderrFileHandle.write(data)
+                                }
+
+                                if let output = String(data: data, encoding: .utf8) {
+                                    print(output, terminator: "")
+                                }
+                            }
+                        }
+                        process.standardError = stderrPipe
+                    }
+                } else {
+                    if let stdoutPipe = stdoutPipe {
+                        stdoutPipe.fileHandleForReading.readabilityHandler = { handle in
+                            let data = handle.availableData
+                            if !data.isEmpty {
+                                if let output = String(data: data, encoding: .utf8) {
+                                    print(output, terminator: "")
+                                }
+                            }
+                        }
+                        process.standardOutput = stdoutPipe
+                    }
+
+                    if let stderrPipe = stderrPipe {
+                        stderrPipe.fileHandleForReading.readabilityHandler = { handle in
+                            let data = handle.availableData
+                            if !data.isEmpty {
+                                if let output = String(data: data, encoding: .utf8) {
+                                    print(output, terminator: "")
+                                }
+                            }
+                        }
+                        process.standardError = stderrPipe
+                    }
+                }
+            } else {
+                process.standardOutput = stdoutFileHandle
+                process.standardError = stderrFileHandle
+            }
         } else {
             process.standardOutput = nil
             process.standardError = nil
@@ -102,6 +176,7 @@ public func sh(
     command: String,
     parameters: [String],
     captureOutput: Bool = false,
+    outputToConsole: Bool = false,
     currentDirectoryPath: String? = nil
 ) throws -> ShellExecutor.Result {
     let executablePath = try which(program: command)
@@ -109,6 +184,7 @@ public func sh(
         command: executablePath,
         arguments: parameters,
         captureOutput: captureOutput,
+        outputToConsole: outputToConsole,
         currentDirectoryPath: currentDirectoryPath
     ).run()
 }
@@ -117,6 +193,7 @@ public func sh(
 public func sh(
     command: [String],
     captureOutput: Bool = false,
+    outputToConsole: Bool = false,
     currentDirectoryPath: String? = nil
 ) throws -> ShellExecutor.Result {
     guard let executable = command.first else {
@@ -126,6 +203,7 @@ public func sh(
         command: executable,
         parameters: Array(command[1...]),
         captureOutput: captureOutput,
+        outputToConsole: outputToConsole,
         currentDirectoryPath: currentDirectoryPath
     )
 }
@@ -134,11 +212,13 @@ public func sh(
 public func sh(
     command: String,
     captureOutput: Bool = false,
+    outputToConsole: Bool = false,
     currentDirectoryPath: String? = nil
 ) throws -> ShellExecutor.Result {
     return try sh(
         command: command.split(separator: " ").map(String.init),
         captureOutput: captureOutput,
+        outputToConsole: outputToConsole,
         currentDirectoryPath: currentDirectoryPath
     )
 }
@@ -147,11 +227,13 @@ public func sh(
 public func sh(
     command: String...,
     captureOutput: Bool = false,
+    outputToConsole: Bool = false,
     currentDirectoryPath: String? = nil
 ) throws -> ShellExecutor.Result {
     return try sh(
         command: command,
         captureOutput: captureOutput,
+        outputToConsole: outputToConsole,
         currentDirectoryPath: currentDirectoryPath
     )
 }
@@ -163,7 +245,8 @@ public func which(program: String) throws -> String {
             "which",
             program
         ],
-        captureOutput: true
+        captureOutput: true,
+        outputToConsole: false
     ).run()
     return result.standardOutput
 }
