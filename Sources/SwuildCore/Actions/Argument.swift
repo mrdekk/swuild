@@ -24,3 +24,12 @@ public extension Context {
         }
     }
 }
+
+extension Argument: ExpressibleByUnicodeScalarLiteral where T == String {}
+extension Argument: ExpressibleByExtendedGraphemeClusterLiteral where T == String {}
+
+extension Argument: ExpressibleByStringLiteral where T == String {
+    public init(stringLiteral value: String) {
+        self = .raw(arg: value)
+    }
+}

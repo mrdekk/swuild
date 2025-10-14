@@ -16,7 +16,7 @@ public struct ExampleFlow: Flow {
     
     public func actions(for context: Context, and platform: Platform) -> [any Action] {
         return [
-            EchoAction(hint: "Print welcome message", contentProvider: { .raw(arg: "Just and Echo") }),
+            EchoAction(hint: "Print welcome message", contentProvider: { "Just and Echo" }),
             ShellAction(hint: "List directory contents", command: "ls", arguments: [.raw(arg: "-la")], captureOutputToKey: "listing"),
             EchoAction(hint: "Display directory listing", contentProvider: { .key(key: "listing") }),
 
