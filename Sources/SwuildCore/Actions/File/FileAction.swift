@@ -28,14 +28,17 @@ public struct FileAction: Action {
 
     private let job: Job
     private let workingDirectory: String
+    private let outputToConsole: Bool
 
     public init(
         hint: String = "-",
         job: Job,
+        outputToConsole: Bool = false,
         workingDirectory: String = FileManager.default.currentDirectoryPath
     ) {
         self.hint = hint
         self.job = job
+        self.outputToConsole = outputToConsole
         self.workingDirectory = workingDirectory
     }
 
@@ -73,6 +76,7 @@ public struct FileAction: Action {
             command: [
                 "rm", "-Rf", path
             ],
+            outputToConsole: outputToConsole,
             currentDirectoryPath: workingDirectory
         )
     }
@@ -85,6 +89,7 @@ public struct FileAction: Action {
         arguments += [path]
         try sh(
             command: arguments,
+            outputToConsole: outputToConsole,
             currentDirectoryPath: workingDirectory
         )
     }
@@ -92,6 +97,7 @@ public struct FileAction: Action {
     private func copy(from: String, to: String) async throws {
         try sh(
             command: "cp", "-R", from, to,
+            outputToConsole: outputToConsole,
             currentDirectoryPath: workingDirectory
         )
     }
