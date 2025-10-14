@@ -40,13 +40,14 @@ private struct EditFlow: Flow {
     public func actions(for context: Context, and platform: Platform) -> [any Action] {
         return [
             ShellAction(
+                hint: "Get Xcode path using xcode-select",
                 command: "xcode-select",
                 arguments: [
                     .raw(arg: "-p")
                 ],
                 captureOutputToKey: kXcodePathKey
             ),
-            AdHocAction { context, _ in
+            AdHocAction(hint: "Validate and process Xcode path") { context, _ in
                 guard
                     let path: String = context.get(for: kXcodePathKey),
                     path.hasSuffix(kContentsDeveloperSuffix)
@@ -59,6 +60,7 @@ private struct EditFlow: Flow {
                 )
             },
             ShellAction(
+                hint: "Open project in Xcode",
                 command: "open",
                 arguments: [
                     .raw(arg: "-a"),

@@ -14,9 +14,12 @@ public struct AdHocAction: Action {
         true
     }
 
+    public let hint: String
+
     private let action: AdHocAction
 
-    public init(action: @escaping AdHocAction) {
+    public init(hint: String = "-", action: @escaping AdHocAction) {
+        self.hint = hint
         self.action = action
     }
 

@@ -9,23 +9,27 @@ public struct TarAction: Action {
         case sourceFileNotExists
     }
 
-    public static let name = "echo"
-    public static let description = "Simple echo action for tests"
+    public static let name = "tar"
+    public static let description = "Action to create tar archives"
     public static let authors = Author.defaultAuthors
 
     public static func isSupported(for platform: Platform) -> Bool {
         true
     }
 
+    public let hint: String
+
     private let path: Argument<String>
     private let tarPath: Argument<String>
     private let workingDirectory: String
 
     public init(
+        hint: String = "-",
         path: Argument<String>,
         tarPath: Argument<String>,
         workingDirectory: String = FileManager.default.currentDirectoryPath
     ) {
+        self.hint = hint
         self.path = path
         self.tarPath = tarPath
         self.workingDirectory = workingDirectory

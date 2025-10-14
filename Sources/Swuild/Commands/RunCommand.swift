@@ -116,8 +116,12 @@ private struct RunFlow: Flow {
 
     public func actions(for context: Context, and platform: Platform) -> [any Action] {
         return [
-            SPMAction(job: .gatherPackageDump(toKey: kPackageDumpKey), workingDirectory: inputFolder),
-            AdHocAction { context, _ in
+            SPMAction(
+                hint: "Gather package dump for flow validation",
+                job: .gatherPackageDump(toKey: kPackageDumpKey),
+                workingDirectory: inputFolder
+            ),
+            AdHocAction(hint: "Validate product exists in package") { context, _ in
                 guard
                     let dump: PackageDump = context.get(for: kPackageDumpKey),
                     dump.products.contains(where: { $0.name == productName })
@@ -126,6 +130,7 @@ private struct RunFlow: Flow {
                 }
             },
             SPMAction(
+                hint: "Gather binary path for flow product",
                 job: .gatherBinPath(
                     product: productName,
                     configuration: kReleaseConfiguration,
@@ -134,13 +139,14 @@ private struct RunFlow: Flow {
                 workingDirectory: inputFolder
             ),
             SPMAction(
+                hint: "Build flow product in release configuration",
                 job: .build(
                     product: productName,
                     configuration: kReleaseConfiguration
                 ),
                 workingDirectory: inputFolder
             ),
-            AdHocAction { context, _ in
+            AdHocAction(hint: "Locate and set flow plugin path") { context, _ in
                 guard let binPath: String = context.get(for: kBinPathKey) else {
                     throw PackageBuilderErrors.binaryProductMissing
                 }

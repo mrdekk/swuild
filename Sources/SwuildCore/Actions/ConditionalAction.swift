@@ -9,12 +9,20 @@ public struct ConditionalAction: Action {
     public static let name = "conditional"
     public static let description = "Executes an action only if a condition is met, with optional else action"
     public static let authors = Author.defaultAuthors
-    
+
+    public let hint: String
+
     private let predicate: Predicate
     private let action: any Action
     private let elseAction: (any Action)?
     
-    public init(predicate: @escaping Predicate, action: any Action, elseAction: (any Action)? = nil) {
+    public init(
+        hint: String = "-",
+        predicate: @escaping Predicate,
+        action: any Action,
+        elseAction: (any Action)? = nil
+    ) {
+        self.hint = hint
         self.predicate = predicate
         self.action = action
         self.elseAction = elseAction

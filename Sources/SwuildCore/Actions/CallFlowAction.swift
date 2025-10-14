@@ -7,10 +7,13 @@ public struct CallFlowAction: Action {
     public static let name = "call-flow"
     public static let description = "Executes another flow"
     public static let authors = Author.defaultAuthors
-    
+
+    public let hint: String
+
     private let flow: any Flow
     
-    public init(flow: any Flow) {
+    public init(hint: String = "-", flow: any Flow) {
+        self.hint = hint
         self.flow = flow
     }
     

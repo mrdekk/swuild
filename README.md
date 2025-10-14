@@ -19,6 +19,17 @@ There are two main things in Swuild: Actions and Flows.
 - **Actions**: some parts of work to do (build one item or just report)
 - **Flows**: composite of sequential actions to perform some finished work.
 
+All actions have a `hint` property that provides human-readable information about what the action does when used in a flow. This is particularly useful for debugging and understanding complex flows. When creating actions, it's recommended to provide meaningful hint values that clearly describe what the action does, rather than using the default "-" value.
+
+For example:
+```swift
+// Instead of using the default hint value
+EchoAction { .raw(arg: "Hello World") }
+
+// Use a meaningful hint value
+EchoAction(hint: "Print greeting message", contentProvider: { .raw(arg: "Hello World") })
+```
+
 For all definitions, you have to use the 'BuildsDefinitions' package. And for some predefined actions and flows, there are SwuildCore (very basic stuff) and other packages.
 
 ## Predefined Actions in SwuildCore
@@ -45,8 +56,8 @@ ConditionalAction(
         // Check if a specific key exists in context
         return context.get(for: "shouldRun") != nil
     },
-    action: EchoAction { .raw(arg: "Condition is true!") },
-    elseAction: EchoAction { .raw(arg: "Condition is false!") }
+    action: EchoAction(hint: "Execute when condition is true", contentProvider: { .raw(arg: "Condition is true!") }),
+    elseAction: EchoAction(hint: "Execute when condition is false", contentProvider: { .raw(arg: "Condition is false!") })
 )
 ```
 
@@ -61,7 +72,7 @@ CallFlowAction(flow: BasicFlow(
     platforms: [.macOS(version: .any)],
     description: "A nested flow"
 ) { _, _ in
-    EchoAction { .raw(arg: "This is a nested flow") }
+    EchoAction(hint: "Message from nested flow", contentProvider: { .raw(arg: "This is a nested flow") })
 })
 ```
 
@@ -72,9 +83,9 @@ The `CompositeAction` allows you to group multiple actions together and execute 
 Example usage:
 ```swift
 CompositeAction { _, _ in
-    EchoAction { .raw(arg: "First action in composite") },
-    ShellAction(command: "echo", arguments: [.raw(arg: "Second action in composite")]),
-    EchoAction { .raw(arg: "Third action in composite") }
+    EchoAction(hint: "First action in composite", contentProvider: { .raw(arg: "First action in composite") }),
+    ShellAction(hint: "Second action in composite", command: "echo", arguments: [.raw(arg: "Second action in composite")]),
+    EchoAction(hint: "Third action in composite", contentProvider: { .raw(arg: "Third action in composite") })
 }
 ```
 
@@ -82,6 +93,7 @@ You can define your actions as:
 
 ```swift
 public struct <your name of action>Action: Action {
+    public let hint: String
 
     // MARK: - BuildsDefinitions.Action
 
@@ -95,11 +107,18 @@ public struct <your name of action>Action: Action {
         <predicate to check if this action is supported on this platform>
     }
 
+    public init(hint: String = "-", <other parameters>) {
+        self.hint = hint
+        // Initialize other properties
+    }
+
     public func execute(context: Context, platform: Platform) async throws {
         <your action execution code>
     }
 }
 ```
+
+When implementing actions, it's recommended to provide meaningful hint values that clearly describe what the action does. This makes it easier to understand complex flows when they are executed.
 
 and you can define your flow as:
 
@@ -146,22 +165,23 @@ let flow = BasicFlow(
     platforms: [.macOS(version: .any)],
     description: "An example flow using function builder"
 ) { _, _ in
-    EchoAction { .raw(arg: "Hello from function builder!") }
-    ShellAction(command: "echo", arguments: [.raw(arg: "Simple command")])
+    EchoAction(hint: "Greeting from function builder", contentProvider: { .raw(arg: "Hello from function builder!") })
+    ShellAction(hint: "Execute simple command", command: "echo", arguments: [.raw(arg: "Simple command")])
     
     // Conditional actions
     if let value: String = context.get(for: "shouldListFiles"), value == "true" {
         ShellAction(
+            hint: "List directory contents",
             command: "ls",
             arguments: [.raw(arg: "-la")],
             captureOutputToKey: "listing"
         )
-        EchoAction { .key(key: "listing") }
+        EchoAction(hint: "Display directory listing", contentProvider: { .key(key: "listing") })
     }
     
     // Loop actions
     for i in 1...3 {
-        EchoAction { .raw(arg: "Iteration \(i)") }
+        EchoAction(hint: "Iteration \(i)", contentProvider: { .raw(arg: "Iteration \(i)") })
     }
 }
 ```

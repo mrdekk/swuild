@@ -20,14 +20,16 @@ public struct SwuildPackFlow: Flow {
 
     public func actions(for context: Context, and platform: Platform) -> [any Action] {
         return [
-            EchoAction { .raw(arg: "Packing Swuild to release binary") },
+            EchoAction(hint: "Start Swuild packing process", contentProvider: { .raw(arg: "Packing Swuild to release binary") }),
             SPMAction(
+                hint: "Build Swuild product in release configuration",
                 job: .build(
                     product: kSwuildProduct,
                     configuration: kReleaseConfiguration
                 )
             ),
             SPMAction(
+                hint: "Gather binary path for Swuild product",
                 job: .gatherBinPath(
                     product: kSwuildProduct,
                     configuration: kReleaseConfiguration,
@@ -35,9 +37,10 @@ public struct SwuildPackFlow: Flow {
                 )
             ),
             FileAction(
+                hint: "Create output directory for release pack",
                 job: .makeDirectory(path: .raw(arg: kOutDirectory), ensureCreated: true)
             ),
-            AdHocAction { context, platform in
+            AdHocAction(hint: "Process binary path and set Swuild binary path") { context, platform in
                 guard
                     let binPath: String = context.get(for: kBinPathKey)
                 else {
@@ -47,9 +50,11 @@ public struct SwuildPackFlow: Flow {
                 context.put(for: kSwuildBinaryPathKey, option: .init(defaultValue: swuildBinaryPath))
             },
             FileAction(
+                hint: "Copy Swuild binary to output directory",
                 job: .copy(from: .key(key: kSwuildBinaryPathKey), to: .raw(arg: kOutDirectory))
             ),
             TarAction(
+                hint: "Create tar archive of release pack",
                 path: .raw(arg: kOutDirectory),
                 tarPath: .raw(arg: kOutTarPath)
             )

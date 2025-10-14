@@ -7,6 +7,7 @@ import SwuildUtils
 public struct FileAction: Action {
 
     public enum Job {
+        case removeDirectory(path: Argument<String>)
         case makeDirectory(path: Argument<String>, ensureCreated: Bool)
         case copy(from: Argument<String>, to: Argument<String>)
     }
@@ -23,13 +24,17 @@ public struct FileAction: Action {
         true
     }
 
+    public let hint: String
+
     private let job: Job
     private let workingDirectory: String
 
     public init(
+        hint: String = "-",
         job: Job,
         workingDirectory: String = FileManager.default.currentDirectoryPath
     ) {
+        self.hint = hint
         self.job = job
         self.workingDirectory = workingDirectory
     }
@@ -37,6 +42,13 @@ public struct FileAction: Action {
     public func execute(context: Context, platform: Platform) async throws {
         do {
             switch job {
+            case let .removeDirectory(path):
+                guard let resolvedPath = try context.arg(path) else {
+                    throw Errors.pathIsNotFound
+                }
+
+                try await removeDirectory(path: resolvedPath)
+
             case let .makeDirectory(path, ensureCreated):
                 guard let resolvedPath = try context.arg(path) else {
                     throw Errors.pathIsNotFound
@@ -54,6 +66,15 @@ public struct FileAction: Action {
         } catch {
             throw error
         }
+    }
+
+    private func removeDirectory(path: String) async throws {
+        try sh(
+            command: [
+                "rm", "-Rf", path
+            ],
+            currentDirectoryPath: workingDirectory
+        )
     }
 
     private func makeDirectory(path: String, ensureCreated: Bool) async throws {

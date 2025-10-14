@@ -7,14 +7,20 @@ public struct CompositeAction: Action {
     public static let name = "composite"
     public static let description = "Executes a series of actions in sequence"
     public static let authors = Author.defaultAuthors
-    
+
+    public let hint: String
+
     private let actionsBuilder: (Context, Platform) -> [any Action]
 
     public func actions(for context: Context, and platform: Platform) -> [any Action] {
         return actionsBuilder(context, platform)
     }
 
-    public init(@FlowActionsBuilder actions: @escaping (Context, Platform) -> [any Action]) {
+    public init(
+        hint: String = "-",
+        @FlowActionsBuilder actions: @escaping (Context, Platform) -> [any Action]
+    ) {
+        self.hint = hint
         self.actionsBuilder = actions
     }
 

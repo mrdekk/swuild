@@ -5,9 +5,11 @@ import BuildsDefinitions
 
 public struct ExampleAction: Action {
 
+    public let hint: String
     private let greeting: String
 
-    public init(greeting: String) {
+    public init(hint: String = "-", greeting: String) {
+        self.hint = hint
         self.greeting = greeting
     }
 

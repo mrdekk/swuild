@@ -18,17 +18,21 @@ public struct ShellAction: Action {
         true
     }
 
+    public let hint: String
+
     private let command: String
     private let arguments: [Argument<String>]
     private let captureOutputToKey: String?
     private let workingDirectory: String
 
     public init(
+        hint: String = "-",
         command: String,
         arguments: [Argument<String>] = [],
         captureOutputToKey: String? = nil,
         workingDirectory: String = FileManager.default.currentDirectoryPath
     ) {
+        self.hint = hint
         self.command = command
         self.arguments = arguments
         self.captureOutputToKey = captureOutputToKey

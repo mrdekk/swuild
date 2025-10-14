@@ -27,8 +27,8 @@ public enum FlowBuilderExamples {
             platforms: [.macOS(version: .any)],
             description: "A basic flow example using function builder"
         ) { _, _ in
-            EchoAction { .raw(arg: "Hello from function builder!") }
-            ShellAction(command: "echo", arguments: [.raw(arg: "Simple command")])
+            EchoAction(hint: "Greeting from function builder", contentProvider: { .raw(arg: "Hello from function builder!") })
+            ShellAction(hint: "Execute simple command", command: "echo", arguments: [.raw(arg: "Simple command")])
         }
     }
 
@@ -38,8 +38,8 @@ public enum FlowBuilderExamples {
             platforms: [.macOS(version: .any)],
             description: "A simple flow example using function builder"
         ) { _, _ in
-            EchoAction { .raw(arg: "Hello from function builder!") }
-            ShellAction(command: "echo", arguments: [.raw(arg: "Simple command")])
+            EchoAction(hint: "Greeting from function builder", contentProvider: { .raw(arg: "Hello from function builder!") })
+            ShellAction(hint: "Execute simple command", command: "echo", arguments: [.raw(arg: "Simple command")])
         }
     }
     
@@ -49,20 +49,21 @@ public enum FlowBuilderExamples {
             platforms: [.macOS(version: .any)],
             description: "A flow with conditional actions"
         ) { context, _ in
-            EchoAction { .raw(arg: "Starting conditional flow") }
+            EchoAction(hint: "Start conditional flow", contentProvider: { .raw(arg: "Starting conditional flow") })
             
             if let value: String = context.get(for: "shouldListFiles"), value == "true" {
                 ShellAction(
+                    hint: "List directory contents",
                     command: "ls",
                     arguments: [.raw(arg: "-la")],
                     captureOutputToKey: "listing"
                 )
-                EchoAction { .key(key: "listing") }
+                EchoAction(hint: "Display directory listing", contentProvider: { .key(key: "listing") })
             } else {
-                EchoAction { .raw(arg: "Skipping file listing") }
+                EchoAction(hint: "Skip file listing", contentProvider: { .raw(arg: "Skipping file listing") })
             }
             
-            EchoAction { .raw(arg: "Flow completed") }
+            EchoAction(hint: "Complete flow", contentProvider: { .raw(arg: "Flow completed") })
         }
     }
     
@@ -72,16 +73,16 @@ public enum FlowBuilderExamples {
             platforms: [.macOS(version: .any)],
             description: "A flow that executes a batch of commands"
         ) { _, _ in
-            EchoAction { .raw(arg: "Starting batch flow") }
+            EchoAction(hint: "Start batch flow", contentProvider: { .raw(arg: "Starting batch flow") })
             
             // Use fixed test commands instead of parameter
             let commands = ["echo Hello", "echo World", "ls -la"]
             
-            for command in commands {
-                ShellAction(command: command)
+            for (index, command) in commands.enumerated() {
+                ShellAction(hint: "Execute command \(index + 1)", command: command)
             }
             
-            EchoAction { .raw(arg: "Batch flow completed") }
+            EchoAction(hint: "Complete batch flow", contentProvider: { .raw(arg: "Batch flow completed") })
         }
     }
     
@@ -92,29 +93,29 @@ public enum FlowBuilderExamples {
             description: "A complex flow demonstrating various function builder features"
         ) { _, _ in
             // Simple actions
-            EchoAction { .raw(arg: "Starting complex flow") }
+            EchoAction(hint: "Start complex flow", contentProvider: { .raw(arg: "Starting complex flow") })
             
             // Conditional actions based on platform
             #if os(macOS)
-            ShellAction(command: "uname", arguments: [.raw(arg: "-a")], captureOutputToKey: "system_info")
-            EchoAction { .key(key: "system_info") }
+            ShellAction(hint: "Get system information", command: "uname", arguments: [.raw(arg: "-a")], captureOutputToKey: "system_info")
+            EchoAction(hint: "Display system information", contentProvider: { .key(key: "system_info") })
             #endif
             
             // Multiple actions in sequence
-            ShellAction(command: "pwd", captureOutputToKey: "current_dir")
-            EchoAction { .key(key: "current_dir") }
+            ShellAction(hint: "Get current directory", command: "pwd", captureOutputToKey: "current_dir")
+            EchoAction(hint: "Display current directory", contentProvider: { .key(key: "current_dir") })
             
             // Conditional actions
             if true {  // This could be a runtime condition
-                EchoAction { .raw(arg: "Condition is true") }
+                EchoAction(hint: "Condition is true", contentProvider: { .raw(arg: "Condition is true") })
             }
             
             // Array of actions
             for i in 1...3 {
-                EchoAction { .raw(arg: "Iteration \(i)") }
+                EchoAction(hint: "Iteration \(i)", contentProvider: { .raw(arg: "Iteration \(i)") })
             }
             
-            EchoAction { .raw(arg: "Complex flow completed") }
+            EchoAction(hint: "Complete complex flow", contentProvider: { .raw(arg: "Complex flow completed") })
         }
     }
     
@@ -124,23 +125,23 @@ public enum FlowBuilderExamples {
             platforms: [.macOS(version: .any)],
             description: "A flow with nested conditional actions"
         ) { _, _ in
-            EchoAction { .raw(arg: "Starting nested conditions flow") }
+            EchoAction(hint: "Start nested conditions flow", contentProvider: { .raw(arg: "Starting nested conditions flow") })
             
             #if os(macOS)
             if true {
-                ShellAction(command: "echo", arguments: [.raw(arg: "On macOS and condition is true")])
+                ShellAction(hint: "Echo on macOS", command: "echo", arguments: [.raw(arg: "On macOS and condition is true")])
                 
                 for i in 1...2 {
                     if i == 1 {
-                        EchoAction { .raw(arg: "First iteration") }
+                        EchoAction(hint: "First iteration", contentProvider: { .raw(arg: "First iteration") })
                     } else {
-                        EchoAction { .raw(arg: "Second iteration") }
+                        EchoAction(hint: "Second iteration", contentProvider: { .raw(arg: "Second iteration") })
                     }
                 }
             }
             #endif
             
-            EchoAction { .raw(arg: "Nested conditions flow completed") }
+            EchoAction(hint: "Complete nested conditions flow", contentProvider: { .raw(arg: "Nested conditions flow completed") })
         }
     }
 }

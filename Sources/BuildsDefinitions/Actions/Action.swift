@@ -16,7 +16,10 @@ public protocol Action: ContextExecutable {
     /// - Parameter platform: The platform to check support for
     /// - Returns: True if the action is supported for the platform, false otherwise
     static func isSupported(for platform: Platform) -> Bool
-    
+
+    /// Hint - additional human readable info for action in flow
+    var hint: String { get }
+
     /// Execute the action with the given context
     /// - Parameter context: The context in which to execute the action
     /// - Returns: A result indicating success or failure

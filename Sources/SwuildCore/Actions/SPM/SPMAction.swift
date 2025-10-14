@@ -20,13 +20,17 @@ public struct SPMAction: Action {
         true
     }
 
+    public let hint: String
+
     private let job: Job
     private let workingDirectory: String
 
     public init(
+        hint: String = "-",
         job: Job,
         workingDirectory: String = FileManager.default.currentDirectoryPath
     ) {
+        self.hint = hint
         self.job = job
         self.workingDirectory = workingDirectory
     }

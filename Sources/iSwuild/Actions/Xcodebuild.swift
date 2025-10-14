@@ -11,6 +11,8 @@ import SwuildUtils
 /// The action is highly configurable through the ``XcodebuildParams`` struct which
 /// organizes parameters into logical groups for better maintainability.
 public struct Xcodebuild: Action {
+    public let hint: String
+    
     public enum Errors: Swift.Error, LocalizedError {
         case missingRequiredParameter(String)
         case executionFailed(String)
@@ -32,12 +34,13 @@ public struct Xcodebuild: Action {
     
     // MARK: - Initialization
     
+    
     /// Initialize an Xcodebuild action with the specified parameters
     /// - Parameter params: The parameters to configure the xcodebuild action
-    public init(params: XcodebuildParams) {
+    public init(hint: String = "-", params: XcodebuildParams) {
+        self.hint = hint
         self.params = params
     }
-    
     // MARK: - BuildsDefinitions.Action
     
     public static let name = "xcodebuild"

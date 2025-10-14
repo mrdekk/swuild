@@ -11,6 +11,8 @@ import SwuildUtils
 /// The action is configurable through the ``CocoaPodsParams`` struct which
 /// contains all the parameters needed to customize the pod installation.
 public struct CocoaPods: Action {
+    public let hint: String
+    
     public enum Errors: Error, LocalizedError {
         case cocoapodsNotInstalled
         case executionFailed(String)
@@ -32,12 +34,13 @@ public struct CocoaPods: Action {
     
     // MARK: - Initialization
     
+    
     /// Initialize a CocoaPods action with the specified parameters
     /// - Parameter params: The parameters to configure the CocoaPods action
-    public init(params: CocoaPodsParams) {
+    public init(hint: String = "-", params: CocoaPodsParams) {
+        self.hint = hint
         self.params = params
     }
-    
     // MARK: - BuildsDefinitions.Action
     
     public static let name = "cocoapods"

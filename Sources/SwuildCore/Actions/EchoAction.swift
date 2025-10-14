@@ -15,14 +15,17 @@ public struct EchoAction: Action {
         true
     }
 
+    public let hint: String
+
     private let contentProvider: ContentProvider
 
-    public init(contentProvider: @escaping ContentProvider) {
+    public init(hint: String = "-", contentProvider: @escaping ContentProvider) {
+        self.hint = hint
         self.contentProvider = contentProvider
     }
 
-    public init(content: String) {
-        self.init(contentProvider: { .raw(arg: content) })
+    public init(hint: String = "-", content: String) {
+        self.init(hint: hint, contentProvider: { .raw(arg: content) })
     }
 
     public func execute(context: Context, platform: Platform) async throws {

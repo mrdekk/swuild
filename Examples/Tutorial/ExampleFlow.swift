@@ -16,11 +16,11 @@ public struct ExampleFlow: Flow {
     
     public func actions(for context: Context, and platform: Platform) -> [any Action] {
         return [
-            EchoAction { .raw(arg: "Just and Echo") },
-            ShellAction(command: "ls", arguments: [.raw(arg: "-la")], captureOutputToKey: "listing"),
-            EchoAction { .key(key: "listing") },
-            ExampleAction(greeting: "World"),
-            EchoAction { .modified(key: "listing", modifier: { _, value in value + "AAAA" }) },
+            EchoAction(hint: "Print welcome message", contentProvider: { .raw(arg: "Just and Echo") }),
+            ShellAction(hint: "List directory contents", command: "ls", arguments: [.raw(arg: "-la")], captureOutputToKey: "listing"),
+            EchoAction(hint: "Display directory listing", contentProvider: { .key(key: "listing") }),
+            ExampleAction(hint: "Run example action", greeting: "World"),
+            EchoAction(hint: "Display modified listing", contentProvider: { .modified(key: "listing", modifier: { _, value in value + "AAAA" }) }),
 
             ConditionalAction(
                 predicate: { context, platform in
@@ -30,14 +30,14 @@ public struct ExampleFlow: Flow {
                         false
                     }
                 },
-                action: EchoAction { .raw(arg: "Conditional action executed") },
-                elseAction: EchoAction { .raw(arg: "Conditional action skipped") }
+                action: EchoAction(hint: "Execute when condition is true", contentProvider: { .raw(arg: "Conditional action executed") }),
+                elseAction: EchoAction(hint: "Execute when condition is false", contentProvider: { .raw(arg: "Conditional action skipped") })
             ),
 
             CompositeAction { context, platform in
-                EchoAction { .raw(arg: "First action in composite") }
-                ShellAction(command: "echo", arguments: [.raw(arg: "Second action in composite")])
-                EchoAction { .raw(arg: "Third action in composite") }
+                EchoAction(hint: "First action in composite", contentProvider: { .raw(arg: "First action in composite") })
+                ShellAction(hint: "Second action in composite", command: "echo", arguments: [.raw(arg: "Second action in composite")])
+                EchoAction(hint: "Third action in composite", contentProvider: { .raw(arg: "Third action in composite") })
             },
 
             CallFlowAction(flow: BasicFlow(
@@ -45,8 +45,8 @@ public struct ExampleFlow: Flow {
                 platforms: [.macOS(version: .any)],
                 description: "A simple flow called from CallFlowAction"
             ) { context, platform in
-                EchoAction { .raw(arg: "This is a flow called from CallFlowAction") }
-                ShellAction(command: "echo", arguments: [.raw(arg: "Hello from nested flow")])
+                EchoAction(hint: "Message from nested flow", contentProvider: { .raw(arg: "This is a flow called from CallFlowAction") })
+                ShellAction(hint: "Hello from nested flow", command: "echo", arguments: [.raw(arg: "Hello from nested flow")])
             }),
         ]
     }
