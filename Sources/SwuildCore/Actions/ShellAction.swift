@@ -24,6 +24,7 @@ public struct ShellAction: Action {
     private let arguments: [Argument<String>]
     private let captureOutputToKey: String?
     private let outputToConsole: Bool
+    private let passEnvironment: Bool
     private let workingDirectory: String
 
     public init(
@@ -32,6 +33,7 @@ public struct ShellAction: Action {
         arguments: [Argument<String>] = [],
         captureOutputToKey: String? = nil,
         outputToConsole: Bool = false,
+        passEnvironment: Bool = false,
         workingDirectory: String = FileManager.default.currentDirectoryPath
     ) {
         self.hint = hint
@@ -39,6 +41,7 @@ public struct ShellAction: Action {
         self.arguments = arguments
         self.captureOutputToKey = captureOutputToKey
         self.outputToConsole = outputToConsole
+        self.passEnvironment = passEnvironment
         self.workingDirectory = workingDirectory
     }
 
@@ -48,6 +51,7 @@ public struct ShellAction: Action {
                 command: [command] + arguments.compactMap { try context.arg($0) },
                 captureOutput: captureOutputToKey != nil,
                 outputToConsole: outputToConsole,
+                passEnvironment: passEnvironment,
                 currentDirectoryPath: workingDirectory
             )
             if let key = captureOutputToKey {
