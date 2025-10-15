@@ -66,6 +66,12 @@ public class ShellExecutor {
             process.currentDirectoryURL = URL(fileURLWithPath: path)
         }
 
+        if outputToConsole {
+            print("command: \(process.executableURL?.absoluteString ?? "")")
+            print("arguments: \(process.arguments?.joined(separator: " ") ?? "")")
+            print("environment: \(process.environment?.compactMap { item in "\(item.key)=\(item.value)" }.joined(separator: " ") ?? "")")
+        }
+
         var stdoutFileURL: URL?
         var stderrFileURL: URL?
         var stdoutFileHandle: FileHandle?
