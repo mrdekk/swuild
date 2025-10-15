@@ -24,7 +24,7 @@ public struct ShellAction: Action {
     private let arguments: [Argument<String>]
     private let captureOutputToKey: String?
     private let outputToConsole: Bool
-    private let passEnvironment: Bool
+    private let passEnvironment: ShellExecutor.Environment
     private let workingDirectory: String
 
     public init(
@@ -33,7 +33,7 @@ public struct ShellAction: Action {
         arguments: [Argument<String>] = [],
         captureOutputToKey: String? = nil,
         outputToConsole: Bool = false,
-        passEnvironment: Bool = false,
+        passEnvironment: ShellExecutor.Environment = .no,
         workingDirectory: String = FileManager.default.currentDirectoryPath
     ) {
         self.hint = hint

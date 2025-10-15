@@ -13,6 +13,12 @@ public class ShellExecutor {
         }
     }
 
+    public enum Environment {
+        case no
+        case custom([String: String])
+        case parent(additional: [String: String])
+    }
+
     enum Errors: Error {
         case missingCommand
     }
@@ -21,7 +27,7 @@ public class ShellExecutor {
     public let arguments: [String]
     public let captureOutput: Bool
     public let outputToConsole: Bool
-    public let passEnvironment: Bool
+    public let passEnvironment: Environment
     public let currentDirectoryPath: String?
 
     public init(
@@ -29,7 +35,7 @@ public class ShellExecutor {
         arguments: [String],
         captureOutput: Bool,
         outputToConsole: Bool = false,
-        passEnvironment: Bool = false,
+        passEnvironment: Environment = .no,
         currentDirectoryPath: String? = nil
     ) {
         self.command = command
@@ -45,8 +51,15 @@ public class ShellExecutor {
         process.executableURL = URL(fileURLWithPath: command)
         process.arguments = arguments
 
-        if passEnvironment {
-            process.environment = ProcessInfo.processInfo.environment
+        switch passEnvironment {
+        case .no:
+            break
+        case let .custom(env):
+            process.environment = env
+        case let .parent(additional):
+            process.environment = ProcessInfo.processInfo.environment.reduce(into: additional) { result, tuple in
+                result[tuple.key] = tuple.value
+            }
         }
 
         if let path = currentDirectoryPath {
@@ -190,7 +203,7 @@ public func sh(
     parameters: [String],
     captureOutput: Bool = false,
     outputToConsole: Bool = false,
-    passEnvironment: Bool = false,
+    passEnvironment: ShellExecutor.Environment = .no,
     currentDirectoryPath: String? = nil
 ) throws -> ShellExecutor.Result {
     let executablePath = try which(program: command)
@@ -209,7 +222,7 @@ public func sh(
     command: [String],
     captureOutput: Bool = false,
     outputToConsole: Bool = false,
-    passEnvironment: Bool = false,
+    passEnvironment: ShellExecutor.Environment = .no,
     currentDirectoryPath: String? = nil
 ) throws -> ShellExecutor.Result {
     guard let executable = command.first else {
@@ -230,7 +243,7 @@ public func sh(
     command: String,
     captureOutput: Bool = false,
     outputToConsole: Bool = false,
-    passEnvironment: Bool = false,
+    passEnvironment: ShellExecutor.Environment = .no,
     currentDirectoryPath: String? = nil
 ) throws -> ShellExecutor.Result {
     return try sh(
@@ -247,7 +260,7 @@ public func sh(
     command: String...,
     captureOutput: Bool = false,
     outputToConsole: Bool = false,
-    passEnvironment: Bool = false,
+    passEnvironment: ShellExecutor.Environment = .no,
     currentDirectoryPath: String? = nil
 ) throws -> ShellExecutor.Result {
     return try sh(
