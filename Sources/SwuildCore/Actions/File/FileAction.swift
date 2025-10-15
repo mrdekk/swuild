@@ -74,7 +74,7 @@ public struct FileAction: Action {
     private func removeDirectory(path: String) async throws {
         try sh(
             command: [
-                "rm", "-Rf", path
+                "sh", "-c", "rm", "-Rf", path
             ],
             outputToConsole: outputToConsole,
             currentDirectoryPath: workingDirectory
@@ -82,7 +82,7 @@ public struct FileAction: Action {
     }
 
     private func makeDirectory(path: String, ensureCreated: Bool) async throws {
-        var arguments = ["mkdir"]
+        var arguments = ["sh", "-c", "mkdir"]
         if ensureCreated {
             arguments += ["-p"]
         }
@@ -96,7 +96,7 @@ public struct FileAction: Action {
 
     private func copy(from: String, to: String) async throws {
         try sh(
-            command: "cp", "-R", from, to,
+            command: "sh", "-c", "cp", "-R", from, to,
             outputToConsole: outputToConsole,
             currentDirectoryPath: workingDirectory
         )
