@@ -16,3 +16,30 @@ public enum Platform {
     case iOS(version: iOSVersions)
     case macOS(version: macOSVersions)
 }
+
+extension Platform: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .iOS(let version):
+            "iOS, version: \(version.description)"
+        case .macOS(let version):
+            "macOS, version: \(version.description)"
+        }
+    }
+}
+
+extension Platform.iOSVersions: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .any: "any"
+        }
+    }
+}
+
+extension Platform.macOSVersions: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .any: "any"
+        }
+    }
+}

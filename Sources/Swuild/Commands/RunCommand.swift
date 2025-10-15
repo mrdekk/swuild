@@ -86,9 +86,10 @@ struct Run: AsyncParsableCommand {
             let flow = flowBuilder.build()
 
             let context = try createContext()
-            try await flow.execute(context: context)
+            let summaries = try await flow.execute(context: context)
 
             print("✅ Flow executed successfully is")
+            summaries.displayExecutionSummary()
 
             if printResultContext, let impl = context as? ContextPrintable {
                 impl.printContext()

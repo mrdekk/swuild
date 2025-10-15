@@ -2,7 +2,7 @@
 
 import Foundation
 
-public protocol Action: ContextExecutable {
+public protocol Action {
     /// The name of the action
     static var name: String { get }
 
