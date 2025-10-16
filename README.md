@@ -45,6 +45,43 @@ SwuildCore provides several predefined actions that you can use in your flows:
 7. **CallFlowAction**: Executes another flow.
 8. **CompositeAction**: Executes a series of actions in sequence.
 
+### FileAction
+
+The `FileAction` provides file operations including copying, moving, and deleting files and directories. One of its key features is the enhanced copy functionality that supports wildcards and recursive copying.
+
+#### Copy Operation
+
+The copy operation in `FileAction` uses a FileManager-based implementation that supports wildcard patterns, making it easy to copy multiple files matching a pattern. The implementation handles recursive copying of directory structures while preserving the directory hierarchy.
+
+Example usage:
+```swift
+// Copy a single file
+FileAction(
+    hint: "Copy configuration file",
+    job: .copy(from: .raw(arg: "config.plist"), to: .raw(arg: "output/config.plist"))
+)
+
+// Copy files matching a wildcard pattern
+FileAction(
+    hint: "Copy all Swift files",
+    job: .copy(from: .raw(arg: "Sources/**/*.swift"), to: .raw(arg: "output/Sources"))
+)
+
+// Copy using context keys
+FileAction(
+    hint: "Copy build artifacts",
+    job: .copy(from: .key(key: "buildOutputPath"), to: .key(key: "deploymentPath"))
+)
+```
+
+The copy operation supports:
+- Simple file-to-file copying
+- Directory copying with recursive structure preservation
+- Wildcard patterns (e.g., `*.txt`, `**/*.swift`) for copying multiple files
+- Context key resolution for dynamic paths
+
+When using wildcards, the system automatically detects the base path and copies all files matching the pattern while preserving the directory structure relative to the base path.
+
 ### ConditionalAction
 
 The `ConditionalAction` allows you to conditionally execute actions based on a predicate function that takes a `Context` and returns a `Bool`. It also supports an optional `elseAction` that will be executed if the condition is false.

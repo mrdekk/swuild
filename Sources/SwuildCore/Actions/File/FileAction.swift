@@ -9,6 +9,7 @@ public struct FileAction: Action {
     public enum Job {
         case removeDirectory(path: Argument<String>)
         case makeDirectory(path: Argument<String>, ensureCreated: Bool)
+        case recreateDirectory(path: Argument<String>, ensureCreated: Bool)
         case copy(from: Argument<String>, to: Argument<String>)
     }
 
@@ -58,6 +59,14 @@ public struct FileAction: Action {
                 }
                 try await makeDirectory(path: resolvedPath, ensureCreated: ensureCreated)
 
+            case let .recreateDirectory(path, ensureCreated):
+                guard let resolvedPath = try context.arg(path) else {
+                    throw Errors.pathIsNotFound
+                }
+
+                try await removeDirectory(path: resolvedPath)
+                try await makeDirectory(path: resolvedPath, ensureCreated: ensureCreated)
+
             case let .copy(from, to):
                 guard let fromResolved = try context.arg(from),
                       let toResolved = try context.arg(to)
@@ -72,33 +81,28 @@ public struct FileAction: Action {
     }
 
     private func removeDirectory(path: String) async throws {
-        try sh(
-            command: [
-                "sh", "-c", "rm", "-Rf", path
-            ],
-            outputToConsole: outputToConsole,
-            currentDirectoryPath: workingDirectory
-        )
+        let fileManager = FileManager.default
+
+        var isDirectory: ObjCBool = false
+        let exists = fileManager.fileExists(atPath: path, isDirectory: &isDirectory)
+
+        if exists, isDirectory.boolValue {
+            try fileManager.removeItem(at: URL(fileURLWithPath: path))
+        }
     }
 
     private func makeDirectory(path: String, ensureCreated: Bool) async throws {
-        var arguments = ["sh", "-c", "mkdir"]
-        if ensureCreated {
-            arguments += ["-p"]
-        }
-        arguments += [path]
-        try sh(
-            command: arguments,
-            outputToConsole: outputToConsole,
-            currentDirectoryPath: workingDirectory
+        try FileManager.default.createDirectory(
+            at: URL(fileURLWithPath: path),
+            withIntermediateDirectories: ensureCreated
         )
     }
 
     private func copy(from: String, to: String) async throws {
-        try sh(
-            command: "sh", "-c", "cp", "-R", from, to,
-            outputToConsole: outputToConsole,
-            currentDirectoryPath: workingDirectory
+        try FileUtils.recursiveCopy(
+            from: from,
+            to: URL(fileURLWithPath: to),
+            outputToConsole: outputToConsole
         )
     }
 }
