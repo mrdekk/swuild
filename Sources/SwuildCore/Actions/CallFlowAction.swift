@@ -3,15 +3,17 @@
 import Foundation
 import BuildsDefinitions
 
-public struct CallFlowAction: Action {
+public final class CallFlowAction: Action, FlowExecutionSummaryProvider {
     public static let name = "call-flow"
     public static let description = "Executes another flow"
     public static let authors = Author.defaultAuthors
 
     public let hint: String
 
+    public private(set) var flowExecutionSummary: FlowExecutionSummary?
+
     private let flow: any Flow
-    
+
     public init(hint: String = "-", flow: any Flow) {
         self.hint = hint
         self.flow = flow
@@ -22,6 +24,6 @@ public struct CallFlowAction: Action {
     }
     
     public func execute(context: Context, platform: Platform) async throws {
-        try await flow.execute(context: context, platform: platform)
+        self.flowExecutionSummary = try await flow.execute(context: context, platform: platform)
     }
 }

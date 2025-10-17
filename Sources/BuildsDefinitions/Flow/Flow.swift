@@ -80,6 +80,11 @@ public extension Flow {
 
             let timing = ActionExecutionTiming(actionName: type(of: action).name, actionHint: action.hint, executionTime: executionTime)
             actionTimings.append(timing)
+
+            if let flowAction = action as? FlowExecutionSummaryProvider,
+               let nestedSummary = flowAction.flowExecutionSummary {
+                actionTimings.append(contentsOf: nestedSummary.actionTimings)
+            }
         }
 
         let flowEndTime = CFAbsoluteTimeGetCurrent()
