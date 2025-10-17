@@ -81,14 +81,7 @@ public struct FileAction: Action {
     }
 
     private func removeDirectory(path: String) async throws {
-        let fileManager = FileManager.default
-
-        var isDirectory: ObjCBool = false
-        let exists = fileManager.fileExists(atPath: path, isDirectory: &isDirectory)
-
-        if exists, isDirectory.boolValue {
-            try fileManager.removeItem(at: URL(fileURLWithPath: path))
-        }
+        try FileUtils.recursiveRemove(pattern: path, outputToConsole: outputToConsole)
     }
 
     private func makeDirectory(path: String, ensureCreated: Bool) async throws {

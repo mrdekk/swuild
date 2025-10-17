@@ -2,13 +2,6 @@
 
 import Foundation
 
-public enum CopyError: Error, Equatable{
-    case basePathNotFound(basePath: String)
-    case directoryCreationFailed(path: String)
-    case directoryEnumeratorFailed
-    case invalidPattern(message: String)
-}
-
 public class FileUtils {
     public static func recursiveCopy(
         from sourcePattern: String,
@@ -26,7 +19,7 @@ public class FileUtils {
                 print("Warning: Source path \(basePath) does not exist. Copy operation will be skipped.")
                 print("Copy finished. 0 files copied.")
             }
-            throw CopyError.basePathNotFound(basePath: basePath)
+            throw FileUtilsError.basePathNotFound(basePath: basePath)
         }
 
         if !fileManager.fileExists(atPath: destinationDir.path) {
@@ -62,7 +55,7 @@ public class FileUtils {
             includingPropertiesForKeys: [.isDirectoryKey, .nameKey],
             options: [.skipsHiddenFiles, .skipsPackageDescendants]
         ) else {
-            throw CopyError.directoryEnumeratorFailed
+            throw FileUtilsError.directoryEnumeratorFailed
         }
 
         var copiedCount = 0
@@ -117,6 +110,98 @@ public class FileUtils {
         print("Copy finished. \(copiedCount) files copied.")
     }
 
+    public static func recursiveRemove(
+        pattern: String,
+        outputToConsole: Bool = false,
+        fileManager: FileManager = .default
+    ) throws {
+        let (basePath, filePattern) = try parsePattern(pattern)
+
+        var isDirectory: ObjCBool = false
+        let basePathExists = fileManager.fileExists(atPath: basePath, isDirectory: &isDirectory)
+
+        if !basePathExists {
+            if outputToConsole {
+                print("Warning: Source path \(basePath) does not exist. Remove operation will be skipped.")
+                print("Remove finished. 0 files removed.")
+            }
+            throw FileUtilsError.basePathNotFound(basePath: basePath)
+        }
+
+        // If basePath is a full pattern, just remove it
+        if basePath == pattern {
+            let sourceURL = URL(fileURLWithPath: basePath)
+            do {
+                try fileManager.removeItem(at: sourceURL)
+                if outputToConsole {
+                    print("Removed: \(sourceURL.lastPathComponent)")
+                    print("Remove finished. 1 files removed.")
+                }
+            } catch {
+                throw FileUtilsError.removalFailed(path: sourceURL.path, error: error)
+            }
+            return
+        }
+
+        // Otherwise, treat as directory with pattern matching
+        let baseURL = URL(fileURLWithPath: basePath, isDirectory: true)
+
+        guard let enumerator = fileManager.enumerator(
+            at: baseURL,
+            includingPropertiesForKeys: [.isDirectoryKey, .nameKey],
+            options: [.skipsHiddenFiles, .skipsPackageDescendants]
+        ) else {
+            throw FileUtilsError.directoryEnumeratorFailed
+        }
+
+        var removedCount = 0
+
+        // Collect files to remove first (to avoid modifying collection during enumeration)
+        var filesToRemove: [URL] = []
+
+        for case let iterFileURL as URL in enumerator {
+            let fileURL = if iterFileURL.path.hasPrefix("/private") {
+                URL(fileURLWithPath: "\(iterFileURL.path.dropFirst("/private".count))")
+            } else {
+                iterFileURL
+            }
+            let resourceValues = try fileURL.resourceValues(forKeys: [.isDirectoryKey])
+            let isDirectory = resourceValues.isDirectory ?? false
+
+            if !isDirectory {
+                if matchesPattern(fileURL, baseURL: baseURL, pattern: filePattern) {
+                    filesToRemove.append(fileURL)
+                } else {
+                    if outputToConsole {
+                        print("File \(fileURL.path) does not match pattern \(filePattern)")
+                    }
+                }
+            }
+        }
+
+        for fileURL in filesToRemove {
+            do {
+                try fileManager.removeItem(at: fileURL)
+                removedCount += 1
+                if outputToConsole {
+                    let fileURLPath = fileURL.path
+                    let baseURLPath = baseURL.path
+                    let relativePath: String = if fileURLPath.hasPrefix(baseURLPath) {
+                        String(fileURLPath.dropFirst(baseURLPath.count))
+                    } else {
+                        fileURLPath
+                    }
+                    let normalizedRelativePath = relativePath.hasPrefix("/") ? String(relativePath.dropFirst()) : relativePath
+                    print("Removed: \(normalizedRelativePath)")
+                }
+            } catch {
+                throw FileUtilsError.removalFailed(path: fileURL.path, error: error)
+            }
+        }
+
+        print("Remove finished. \(removedCount) files removed.")
+    }
+
     private static func createDestinationDirectory(url: URL, outputToConsole: Bool, fileManager: FileManager) throws {
         do {
             try fileManager.createDirectory(at: url, withIntermediateDirectories: true)
@@ -124,7 +209,7 @@ public class FileUtils {
             if outputToConsole {
                 print("Warning: Failed to create destination directory \(url.path): \(error)")
             }
-            throw CopyError.directoryCreationFailed(path: url.path)
+            throw FileUtilsError.directoryCreationFailed(path: url.path)
         }
     }
 
@@ -143,7 +228,7 @@ public class FileUtils {
         let filePattern = patternComponents.joined(separator: "/")
 
         guard !basePath.isEmpty else {
-            throw CopyError.invalidPattern(message: "Can't autodetect base path from pattern: \(pattern)")
+            throw FileUtilsError.invalidPattern(message: "Can't autodetect base path from pattern: \(pattern)")
         }
 
         return (basePath, filePattern)

@@ -13,10 +13,6 @@ struct FileUtilsTests {
     init() {
         fileManager = FileManager.default
         testDirectory = URL.cachesDirectory
-            .appendingPathComponent("FileUtilsTests", isDirectory: true)
-
-        try? fileManager.removeItem(at: testDirectory)
-        try? fileManager.createDirectory(at: testDirectory, withIntermediateDirectories: true)
     }
 
     @Test
@@ -137,8 +133,106 @@ struct FileUtilsTests {
         let nonExistentSource = "/path/that/does/not/exist"
         let destinationDir = uniqueTestDir.appendingPathComponent("destination", isDirectory: true)
         
-        #expect(throws: CopyError.basePathNotFound(basePath: "/path/that/does/not/exist")) {
+        #expect(throws: FileUtilsError.basePathNotFound(basePath: "/path/that/does/not/exist")) {
             try FileUtils.recursiveCopy(from: nonExistentSource, to: destinationDir)
+        }
+
+        try fileManager.removeItem(at: uniqueTestDir)
+    }
+
+    @Test
+    func testRecursiveRemoveWithSimpleFile() throws {
+        let uniqueTestDir = testDirectory.appendingPathComponent("simpleFileRemove", isDirectory: true)
+        try fileManager.createDirectory(at: uniqueTestDir, withIntermediateDirectories: true)
+
+        let sourceDir = uniqueTestDir.appendingPathComponent("source", isDirectory: true)
+        try fileManager.createDirectory(at: sourceDir, withIntermediateDirectories: true)
+
+        let sourceFile = sourceDir.appendingPathComponent("test.txt")
+        try "Hello, World!".write(to: sourceFile, atomically: true, encoding: .utf8)
+
+        #expect(fileManager.fileExists(atPath: sourceFile.path))
+
+        try FileUtils.recursiveRemove(pattern: sourceFile.path)
+
+        #expect(!fileManager.fileExists(atPath: sourceFile.path))
+
+        try fileManager.removeItem(at: uniqueTestDir)
+    }
+
+    @Test
+    func testRecursiveRemoveWithWildcardPattern() throws {
+        let uniqueTestDir = testDirectory.appendingPathComponent("wildcardPatternRemove", isDirectory: true)
+        try fileManager.createDirectory(at: uniqueTestDir, withIntermediateDirectories: true)
+
+        let sourceDir = uniqueTestDir.appendingPathComponent("source", isDirectory: true)
+        try fileManager.createDirectory(at: sourceDir, withIntermediateDirectories: true)
+
+        let txtFile = sourceDir.appendingPathComponent("test.txt")
+        try "Text file content".write(to: txtFile, atomically: true, encoding: .utf8)
+
+        let swiftFile = sourceDir.appendingPathComponent("test.swift")
+        try "Swift file content".write(to: swiftFile, atomically: true, encoding: .utf8)
+
+        let mdFile = sourceDir.appendingPathComponent("test.md")
+        try "Markdown file content".write(to: mdFile, atomically: true, encoding: .utf8)
+
+        let subDir = sourceDir.appendingPathComponent("subdir", isDirectory: true)
+        try fileManager.createDirectory(at: subDir, withIntermediateDirectories: true)
+
+        let subTxtFile = subDir.appendingPathComponent("sub.txt")
+        try "Subdirectory text file".write(to: subTxtFile, atomically: true, encoding: .utf8)
+
+        #expect(fileManager.fileExists(atPath: txtFile.path))
+        #expect(fileManager.fileExists(atPath: swiftFile.path))
+        #expect(fileManager.fileExists(atPath: mdFile.path))
+        #expect(fileManager.fileExists(atPath: subTxtFile.path))
+
+        try FileUtils.recursiveRemove(
+            pattern: sourceDir.appendingPathComponent("*.txt").path,
+            outputToConsole: true
+        )
+
+        #expect(!fileManager.fileExists(atPath: txtFile.path))
+        #expect(fileManager.fileExists(atPath: swiftFile.path))
+        #expect(fileManager.fileExists(atPath: mdFile.path))
+        #expect(fileManager.fileExists(atPath: subTxtFile.path))
+
+        try "Text file content".write(to: txtFile, atomically: true, encoding: .utf8)
+        #expect(fileManager.fileExists(atPath: txtFile.path))
+
+        try FileUtils.recursiveRemove(
+            pattern: sourceDir.appendingPathComponent("**/*.txt").path,
+            outputToConsole: true
+        )
+
+        #expect(fileManager.fileExists(atPath: txtFile.path))
+        #expect(fileManager.fileExists(atPath: swiftFile.path))
+        #expect(fileManager.fileExists(atPath: mdFile.path))
+        #expect(!fileManager.fileExists(atPath: subTxtFile.path))
+
+        try FileUtils.recursiveRemove(
+            pattern: sourceDir.appendingPathComponent("**.txt").path,
+            outputToConsole: true
+        )
+
+        #expect(!fileManager.fileExists(atPath: txtFile.path))
+        #expect(fileManager.fileExists(atPath: swiftFile.path))
+        #expect(fileManager.fileExists(atPath: mdFile.path))
+        #expect(!fileManager.fileExists(atPath: subTxtFile.path))
+
+        try fileManager.removeItem(at: uniqueTestDir)
+    }
+
+    @Test
+    func testRecursiveRemoveWithNonExistentSource() throws {
+        let uniqueTestDir = testDirectory.appendingPathComponent("nonExistentSourceRemove", isDirectory: true)
+        try fileManager.createDirectory(at: uniqueTestDir, withIntermediateDirectories: true)
+
+        let nonExistentSource = "/path/that/does/not/exist"
+
+        #expect(throws: FileUtilsError.basePathNotFound(basePath: "/path/that/does/not/exist")) {
+            try FileUtils.recursiveRemove(pattern: nonExistentSource)
         }
 
         try fileManager.removeItem(at: uniqueTestDir)

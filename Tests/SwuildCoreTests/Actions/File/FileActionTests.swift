@@ -15,10 +15,6 @@ struct FileActionTests {
     init() {
         fileManager = FileManager.default
         testDirectory =  URL.cachesDirectory
-            .appendingPathComponent("FileActionTests", isDirectory: true)
-
-        try? fileManager.removeItem(at: testDirectory)
-        try? fileManager.createDirectory(at: testDirectory, withIntermediateDirectories: true)
     }
 
     @Test
@@ -209,29 +205,60 @@ struct FileActionTests {
 
         try fileManager.removeItem(at: uniqueTestDir)
     }
-    
+
     @Test
     func testFileActionRemoveDirectoryJob() async throws {
         let uniqueTestDir = testDirectory.appendingPathComponent("removeDirectoryJob", isDirectory: true)
         try fileManager.createDirectory(at: uniqueTestDir, withIntermediateDirectories: true)
-        
+
         let directoryToRemove = uniqueTestDir.appendingPathComponent("toRemove", isDirectory: true)
         try fileManager.createDirectory(at: directoryToRemove, withIntermediateDirectories: true)
-        
+
         let fileInDirectory = directoryToRemove.appendingPathComponent("file.txt")
         try "File content".write(to: fileInDirectory, atomically: true, encoding: .utf8)
-        
+
         #expect(fileManager.fileExists(atPath: directoryToRemove.path))
         #expect(fileManager.fileExists(atPath: fileInDirectory.path))
-        
+
         let action = FileAction(
             job: .removeDirectory(path: .raw(arg: directoryToRemove.path))
         )
         let context = MockContext()
-        
+
         try await action.execute(context: context, platform: .macOS(version: .any))
-        
+
         #expect(!fileManager.fileExists(atPath: directoryToRemove.path))
+
+        try fileManager.removeItem(at: uniqueTestDir)
+    }
+
+    @Test
+    func testFileActionRemoveDirectoryJobWithWildcard() async throws {
+        let uniqueTestDir = testDirectory.appendingPathComponent("removeDirectoryJobWithWildcard", isDirectory: true)
+        try fileManager.createDirectory(at: uniqueTestDir, withIntermediateDirectories: true)
+
+        let sourceDir = uniqueTestDir.appendingPathComponent("source", isDirectory: true)
+        try fileManager.createDirectory(at: sourceDir, withIntermediateDirectories: true)
+
+        let txtFile = sourceDir.appendingPathComponent("test.txt")
+        try "Text file content".write(to: txtFile, atomically: true, encoding: .utf8)
+
+        let swiftFile = sourceDir.appendingPathComponent("test.swift")
+        try "Swift file content".write(to: swiftFile, atomically: true, encoding: .utf8)
+
+        #expect(fileManager.fileExists(atPath: txtFile.path))
+        #expect(fileManager.fileExists(atPath: swiftFile.path))
+
+        let action = FileAction(
+            job: .removeDirectory(path: .raw(arg: sourceDir.appendingPathComponent("*.txt").path)),
+            outputToConsole: false
+        )
+        let context = MockContext()
+
+        try await action.execute(context: context, platform: .macOS(version: .any))
+
+        #expect(!fileManager.fileExists(atPath: txtFile.path))
+        #expect(fileManager.fileExists(atPath: swiftFile.path))
 
         try fileManager.removeItem(at: uniqueTestDir)
     }
