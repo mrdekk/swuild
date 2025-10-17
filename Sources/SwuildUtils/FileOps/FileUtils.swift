@@ -118,10 +118,6 @@ public class FileUtils {
                     if outputToConsole {
                         print("Copied: \(normalizedRelativePath)")
                     }
-                } else {
-                    if outputToConsole {
-                        print("File \(fileURL.path) does not match pattern \(filePattern)")
-                    }
                 }
             }
         }
@@ -190,10 +186,6 @@ public class FileUtils {
             if !isDirectory {
                 if matchesPattern(fileURL, baseURL: baseURL, pattern: filePattern) {
                     filesToRemove.append(fileURL)
-                } else {
-                    if outputToConsole {
-                        print("File \(fileURL.path) does not match pattern \(filePattern)")
-                    }
                 }
             }
         }
