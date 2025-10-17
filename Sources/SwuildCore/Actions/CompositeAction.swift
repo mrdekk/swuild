@@ -10,6 +10,10 @@ public struct CompositeAction: Action {
 
     public let hint: String
 
+    /// If true, exceptions thrown by child actions will be caught and logged,
+    /// but not propagated further. If false, exceptions will be propagated normally.
+    public let swallowExceptions: Bool
+
     private let actionsBuilder: (Context, Platform) -> [any Action]
 
     public func actions(for context: Context, and platform: Platform) -> [any Action] {
@@ -18,9 +22,11 @@ public struct CompositeAction: Action {
 
     public init(
         hint: String = "-",
+        swallowExceptions: Bool = false,
         @FlowActionsBuilder actions: @escaping (Context, Platform) -> [any Action]
     ) {
         self.hint = hint
+        self.swallowExceptions = swallowExceptions
         self.actionsBuilder = actions
     }
 
@@ -31,7 +37,15 @@ public struct CompositeAction: Action {
     public func execute(context: Context, platform: Platform) async throws {
         let actions = actions(for: context, and: platform)
         for action in actions {
-            try await action.execute(context: context, platform: platform)
+            if swallowExceptions {
+                do {
+                    try await action.execute(context: context, platform: platform)
+                } catch {
+                    print("CompositeAction: Caught exception from child action '\(action.hint)': \(error)")
+                }
+            } else {
+                try await action.execute(context: context, platform: platform)
+            }
         }
     }
 }
