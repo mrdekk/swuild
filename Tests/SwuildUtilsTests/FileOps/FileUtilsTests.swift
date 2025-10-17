@@ -123,7 +123,69 @@ struct FileUtilsTests {
 
         try fileManager.removeItem(at: uniqueTestDir)
     }
-    
+
+    @Test
+    func testRecursiveCopyWithWildcardMode() throws {
+        let uniqueTestDir = testDirectory.appendingPathComponent("wildcardMode", isDirectory: true)
+        try fileManager.createDirectory(at: uniqueTestDir, withIntermediateDirectories: true)
+
+        let sourceDir = uniqueTestDir.appendingPathComponent("source", isDirectory: true)
+        try fileManager.createDirectory(at: sourceDir, withIntermediateDirectories: true)
+
+        // Create directories: source/a/b/c/
+        let dirA = sourceDir.appendingPathComponent("a", isDirectory: true)
+        try fileManager.createDirectory(at: dirA, withIntermediateDirectories: true)
+
+        let dirB = dirA.appendingPathComponent("b", isDirectory: true)
+        try fileManager.createDirectory(at: dirB, withIntermediateDirectories: true)
+
+        let dirC = dirB.appendingPathComponent("c", isDirectory: true)
+        try fileManager.createDirectory(at: dirC, withIntermediateDirectories: true)
+
+        let file1 = dirC.appendingPathComponent("file1.txt")
+        try "File 1 content".write(to: file1, atomically: true, encoding: .utf8)
+
+        let file2 = dirB.appendingPathComponent("file2.txt")
+        try "File 2 content".write(to: file2, atomically: true, encoding: .utf8)
+
+        #expect(fileManager.fileExists(atPath: file1.path))
+        #expect(fileManager.fileExists(atPath: file2.path))
+
+        let destinationDir1 = uniqueTestDir.appendingPathComponent("destination1", isDirectory: true)
+        try fileManager.createDirectory(at: destinationDir1, withIntermediateDirectories: true)
+
+        try FileUtils.recursiveCopy(
+            from: sourceDir.appendingPathComponent("*/*/c/*.txt").path,
+            to: destinationDir1,
+            outputToConsole: true,
+            wildcardMode: .first
+        )
+
+        #expect(fileManager.fileExists(atPath: destinationDir1.appendingPathComponent("a/b/c/file1.txt").path))
+
+        let copiedFile1First = destinationDir1.appendingPathComponent("a/b/c/file1.txt")
+        let content1First = try String(contentsOf: copiedFile1First)
+        #expect(content1First == "File 1 content")
+
+        let destinationDir2 = uniqueTestDir.appendingPathComponent("destination2", isDirectory: true)
+        try fileManager.createDirectory(at: destinationDir2, withIntermediateDirectories: true)
+
+        try FileUtils.recursiveCopy(
+            from: sourceDir.appendingPathComponent("*/*/c/*.txt").path,
+            to: destinationDir2,
+            outputToConsole: true,
+            wildcardMode: .last
+        )
+
+        #expect(fileManager.fileExists(atPath: destinationDir2.appendingPathComponent("file1.txt").path))
+
+        let copiedFile1Last = destinationDir2.appendingPathComponent("file1.txt")
+        let content1Last = try String(contentsOf: copiedFile1Last)
+        #expect(content1Last == "File 1 content")
+
+        try fileManager.removeItem(at: uniqueTestDir)
+    }
+
     @Test
     func testRecursiveCopyWithNonExistentSource() throws {
         // Create unique test directory

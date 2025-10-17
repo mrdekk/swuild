@@ -40,7 +40,7 @@ struct FileActionTests {
         try fileManager.createDirectory(at: destinationDir, withIntermediateDirectories: true)
         
         let action = FileAction(
-            job: .copy(from: .raw(arg: sourceFile.path), to: .raw(arg: destinationDir.path))
+            job: .copy(from: .raw(arg: sourceFile.path), to: .raw(arg: destinationDir.path), wildcardMode: .first)
         )
         let context = MockContext()
         
@@ -78,7 +78,8 @@ struct FileActionTests {
         let action = FileAction(
             job: .copy(
                 from: .raw(arg: sourceDir.appendingPathComponent("*.txt").path),
-                to: .raw(arg: destinationDir.path)
+                to: .raw(arg: destinationDir.path),
+                wildcardMode: .first
             )
         )
         let context = MockContext()
@@ -112,7 +113,7 @@ struct FileActionTests {
         try fileManager.createDirectory(at: destinationDir, withIntermediateDirectories: true)
         
         let action = FileAction(
-            job: .copy(from: .key(key: "sourceFile"), to: .raw(arg: destinationDir.path))
+            job: .copy(from: .key(key: "sourceFile"), to: .raw(arg: destinationDir.path), wildcardMode: .first)
         )
         let context = MockContext()
         context.setArgument("sourceFile", value: sourceFile.path)
@@ -131,7 +132,7 @@ struct FileActionTests {
     @Test
     func testFileActionCopyJobWithMissingContextKey() async throws {
         let action = FileAction(
-            job: .copy(from: .key(key: "missingKey"), to: .raw(arg: "/destination"))
+            job: .copy(from: .key(key: "missingKey"), to: .raw(arg: "/destination"), wildcardMode: .first)
         )
         let context = MockContext()
         

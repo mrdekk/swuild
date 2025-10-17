@@ -51,7 +51,7 @@ public struct SwuildPackFlow: Flow {
             },
             FileAction(
                 hint: "Copy Swuild binary to output directory",
-                job: .copy(from: .key(key: kSwuildBinaryPathKey), to: .raw(arg: kOutDirectory))
+                job: .copy(from: .key(key: kSwuildBinaryPathKey), to: .raw(arg: kOutDirectory), wildcardMode: .first)
             ),
             TarAction(
                 hint: "Create tar archive of release pack",

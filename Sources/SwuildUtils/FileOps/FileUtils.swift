@@ -2,11 +2,32 @@
 
 import Foundation
 
+/// An enumeration that defines how to handle folder structure preservation when using wildcards in file patterns.
+///
+/// - first: Preserves folder structure from the first wildcard onwards.
+/// - last: Preserves folder structure from the last wildcard onwards.
+public enum WildcardMode {
+    case first
+    case last
+}
+
 public class FileUtils {
+    /// Recursively copies files matching a pattern from a source directory to a destination directory.
+    ///
+    /// - Parameters:
+    ///   - sourcePattern: The source pattern to match files against. Can include wildcards like `*` and `**`.
+    ///   - destinationDir: The destination directory where matched files will be copied.
+    ///   - outputToConsole: Whether to output progress information to the console. Defaults to `false`.
+    ///   - wildcardMode: Controls how the folder structure is preserved when copying files with wildcards.
+    ///     - `.first`: Preserves the folder structure from the first wildcard onwards (default behavior).
+    ///     - `.last`: Preserves the folder structure from the last wildcard onwards.
+    ///   - fileManager: The FileManager instance to use for file operations. Defaults to `.default`.
+    /// - Throws: FileUtilsError if there are issues with file operations.
     public static func recursiveCopy(
         from sourcePattern: String,
         to destinationDir: URL,
         outputToConsole: Bool = false,
+        wildcardMode: WildcardMode = .first,
         fileManager: FileManager = .default
     ) throws {
         let (basePath, filePattern) = try parsePattern(sourcePattern)
@@ -71,14 +92,12 @@ public class FileUtils {
 
             if !isDirectory {
                 if matchesPattern(fileURL, baseURL: baseURL, pattern: filePattern) {
-                    let fileURLPath = fileURL.path
-                    let baseURLPath = baseURL.path
-                    let relativePath: String = if fileURLPath.hasPrefix(baseURLPath) {
-                        String(fileURLPath.dropFirst(baseURLPath.count))
-                    } else {
-                        fileURLPath
-                    }
-                    let normalizedRelativePath = relativePath.hasPrefix("/") ? String(relativePath.dropFirst()) : relativePath
+                    let normalizedRelativePath = calculateRelativePath(
+                        fileURL: fileURL,
+                        baseURL: baseURL,
+                        filePattern: filePattern,
+                        wildcardMode: wildcardMode
+                    )
                     let destinationURL = destinationDir.appendingPathComponent(normalizedRelativePath)
 
                     let destinationFolder = destinationURL.deletingLastPathComponent()
@@ -210,6 +229,67 @@ public class FileUtils {
                 print("Warning: Failed to create destination directory \(url.path): \(error)")
             }
             throw FileUtilsError.directoryCreationFailed(path: url.path)
+        }
+    }
+
+    /// Calculates the relative path for a file based on the wildcard mode.
+    ///
+    /// This function determines how to preserve folder structure when copying files with wildcards.
+    /// - For `.first` mode: Preserves the folder structure from the first wildcard onwards
+    /// - For `.last` mode: Preserves only the folder structure from the last wildcard onwards
+    ///
+    /// - Parameters:
+    ///   - fileURL: The URL of the file being processed.
+    ///   - baseURL: The base URL of the source directory.
+    ///   - filePattern: The file pattern being used for matching.
+    ///   - wildcardMode: The mode that determines how to preserve folder structure.
+    /// - Returns: The relative path to use for the destination file.
+    private static func calculateRelativePath(
+        fileURL: URL,
+        baseURL: URL,
+        filePattern: String,
+        wildcardMode: WildcardMode
+    ) -> String {
+        let fileURLPath = fileURL.path
+        let baseURLPath = baseURL.path
+
+        let standardRelativePath: String = if fileURLPath.hasPrefix(baseURLPath) {
+            String(fileURLPath.dropFirst(baseURLPath.count))
+        } else {
+            fileURLPath
+        }
+        let normalizedStandardRelativePath = standardRelativePath.hasPrefix("/")
+            ? String(standardRelativePath.dropFirst())
+            : standardRelativePath
+
+        switch wildcardMode {
+        case .first:
+            // For first mode, we want to preserve the folder structure from the first wildcard onwards
+            // Pattern: */*/*/c/*.txt, File: a/b/c/file1.txt
+            // Expected: a/b/c/file1.txt (preserve all components)
+            return normalizedStandardRelativePath
+
+        case .last:
+            // For last mode, we want to preserve only the folder structure from the last wildcard onwards
+            // Pattern: */*/*/c/*.txt, File: a/b/c/file1.txt
+            // Expected: file1.txt (preserve only components from last wildcard)
+            let patternComponents = filePattern.components(separatedBy: "/")
+            guard let lastWildcardIndex = patternComponents.lastIndex(where: { $0.contains("*") }) else {
+                return normalizedStandardRelativePath
+            }
+
+            // For last mode, we want to skip components up to the last wildcard
+            // Pattern: */*/*/c/*.txt, File: a/b/c/file1.txt
+            // Expected: file1.txt (skip "a/b/c" which corresponds to components up to last wildcard position)
+            let relativeComponents = normalizedStandardRelativePath.components(separatedBy: "/")
+            guard relativeComponents.count > lastWildcardIndex else {
+                return normalizedStandardRelativePath
+            }
+
+            // Take components starting from the last wildcard index onwards
+            // This gives us the components from the last wildcard position
+            let lastModeComponents = Array(relativeComponents[lastWildcardIndex...])
+            return lastModeComponents.joined(separator: "/")
         }
     }
 

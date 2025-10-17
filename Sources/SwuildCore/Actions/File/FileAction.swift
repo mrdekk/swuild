@@ -10,7 +10,7 @@ public struct FileAction: Action {
         case removeDirectory(path: Argument<String>)
         case makeDirectory(path: Argument<String>, ensureCreated: Bool)
         case recreateDirectory(path: Argument<String>, ensureCreated: Bool)
-        case copy(from: Argument<String>, to: Argument<String>)
+        case copy(from: Argument<String>, to: Argument<String>, wildcardMode: WildcardMode)
     }
 
     public enum Errors: Error {
@@ -67,13 +67,13 @@ public struct FileAction: Action {
                 try await removeDirectory(path: resolvedPath)
                 try await makeDirectory(path: resolvedPath, ensureCreated: ensureCreated)
 
-            case let .copy(from, to):
+            case let .copy(from, to, wildcardMode):
                 guard let fromResolved = try context.arg(from),
                       let toResolved = try context.arg(to)
                 else {
                     throw Errors.pathIsNotFound
                 }
-                try await copy(from: fromResolved, to: toResolved)
+                try await copy(from: fromResolved, to: toResolved, wildcardMode: wildcardMode)
             }
         } catch {
             throw error
@@ -91,11 +91,12 @@ public struct FileAction: Action {
         )
     }
 
-    private func copy(from: String, to: String) async throws {
+    private func copy(from: String, to: String, wildcardMode: WildcardMode) async throws {
         try FileUtils.recursiveCopy(
             from: from,
             to: URL(fileURLWithPath: to),
-            outputToConsole: outputToConsole
+            outputToConsole: outputToConsole,
+            wildcardMode: wildcardMode
         )
     }
 }
