@@ -171,8 +171,9 @@ public class FileUtils {
 
         var removedCount = 0
 
-        // Collect files to remove first (to avoid modifying collection during enumeration)
-        var filesToRemove: [URL] = []
+        // Collect items to remove first (to avoid modifying collection during enumeration)
+        // We need to collect both files and directories that match the pattern
+        var itemsToRemove: [URL] = []
 
         for case let iterFileURL as URL in enumerator {
             let fileURL = if iterFileURL.path.hasPrefix("/private") {
@@ -181,36 +182,39 @@ public class FileUtils {
                 iterFileURL
             }
             let resourceValues = try fileURL.resourceValues(forKeys: [.isDirectoryKey])
-            let isDirectory = resourceValues.isDirectory ?? false
 
-            if !isDirectory {
-                if matchesPattern(fileURL, baseURL: baseURL, pattern: filePattern) {
-                    filesToRemove.append(fileURL)
-                }
+            if matchesPattern(fileURL, baseURL: baseURL, pattern: filePattern) {
+                itemsToRemove.append(fileURL)
             }
         }
 
-        for fileURL in filesToRemove {
+        // Sort items to remove directories after files (reverse order of path depth)
+        // This ensures we remove files before their parent directories
+        itemsToRemove.sort { url1, url2 in
+            url1.pathComponents.count > url2.pathComponents.count
+        }
+
+        for itemURL in itemsToRemove {
             do {
-                try fileManager.removeItem(at: fileURL)
+                try fileManager.removeItem(at: itemURL)
                 removedCount += 1
                 if outputToConsole {
-                    let fileURLPath = fileURL.path
+                    let itemURLPath = itemURL.path
                     let baseURLPath = baseURL.path
-                    let relativePath: String = if fileURLPath.hasPrefix(baseURLPath) {
-                        String(fileURLPath.dropFirst(baseURLPath.count))
+                    let relativePath: String = if itemURLPath.hasPrefix(baseURLPath) {
+                        String(itemURLPath.dropFirst(baseURLPath.count))
                     } else {
-                        fileURLPath
+                        itemURLPath
                     }
                     let normalizedRelativePath = relativePath.hasPrefix("/") ? String(relativePath.dropFirst()) : relativePath
                     print("Removed: \(normalizedRelativePath)")
                 }
             } catch {
-                throw FileUtilsError.removalFailed(path: fileURL.path, error: error)
+                throw FileUtilsError.removalFailed(path: itemURL.path, error: error)
             }
         }
 
-        print("Remove finished. \(removedCount) files removed.")
+        print("Remove finished. \(removedCount) items removed.")
     }
 
     private static func createDestinationDirectory(url: URL, outputToConsole: Bool, fileManager: FileManager) throws {

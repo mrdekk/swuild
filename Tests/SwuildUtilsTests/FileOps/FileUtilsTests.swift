@@ -287,6 +287,82 @@ struct FileUtilsTests {
     }
 
     @Test
+    func testRecursiveRemoveWithDirectories() throws {
+        let uniqueTestDir = testDirectory.appendingPathComponent("directoryRemove", isDirectory: true)
+        try fileManager.createDirectory(at: uniqueTestDir, withIntermediateDirectories: true)
+
+        let sourceDir = uniqueTestDir.appendingPathComponent("source", isDirectory: true)
+        try fileManager.createDirectory(at: sourceDir, withIntermediateDirectories: true)
+
+        // Create directory structure:
+        // source/
+        //   dir1/
+        //     file1.txt
+        //   dir2/
+        //     subdir/
+        //       file2.txt
+        //     file3.txt
+        //   file4.txt
+
+        let dir1 = sourceDir.appendingPathComponent("dir1", isDirectory: true)
+        try fileManager.createDirectory(at: dir1, withIntermediateDirectories: true)
+        let file1 = dir1.appendingPathComponent("file1.txt")
+        try "File 1 content".write(to: file1, atomically: true, encoding: .utf8)
+
+        let dir2 = sourceDir.appendingPathComponent("dir2", isDirectory: true)
+        try fileManager.createDirectory(at: dir2, withIntermediateDirectories: true)
+        let subdir = dir2.appendingPathComponent("subdir", isDirectory: true)
+        try fileManager.createDirectory(at: subdir, withIntermediateDirectories: true)
+        let file2 = subdir.appendingPathComponent("file2.txt")
+        try "File 2 content".write(to: file2, atomically: true, encoding: .utf8)
+        let file3 = dir2.appendingPathComponent("file3.txt")
+        try "File 3 content".write(to: file3, atomically: true, encoding: .utf8)
+
+        let file4 = sourceDir.appendingPathComponent("file4.txt")
+        try "File 4 content".write(to: file4, atomically: true, encoding: .utf8)
+
+        #expect(fileManager.fileExists(atPath: dir1.path))
+        #expect(fileManager.fileExists(atPath: file1.path))
+        #expect(fileManager.fileExists(atPath: dir2.path))
+        #expect(fileManager.fileExists(atPath: subdir.path))
+        #expect(fileManager.fileExists(atPath: file2.path))
+        #expect(fileManager.fileExists(atPath: file3.path))
+        #expect(fileManager.fileExists(atPath: file4.path))
+
+        try FileUtils.recursiveRemove(
+            pattern: sourceDir.appendingPathComponent("dir1/**").path,
+            outputToConsole: true
+        )
+
+        #expect(fileManager.fileExists(atPath: dir1.path))
+        #expect(!fileManager.fileExists(atPath: file1.path))
+
+        #expect(fileManager.fileExists(atPath: dir2.path))
+        #expect(fileManager.fileExists(atPath: subdir.path))
+        #expect(fileManager.fileExists(atPath: file2.path))
+        #expect(fileManager.fileExists(atPath: file3.path))
+        #expect(fileManager.fileExists(atPath: file4.path))
+
+        try FileUtils.recursiveRemove(
+            pattern: sourceDir.appendingPathComponent("**/subdir/**").path,
+            outputToConsole: true
+        )
+
+        #expect(fileManager.fileExists(atPath: subdir.path))
+        #expect(!fileManager.fileExists(atPath: file2.path))
+
+        #expect(fileManager.fileExists(atPath: dir2.path))
+        #expect(fileManager.fileExists(atPath: file3.path))
+        #expect(fileManager.fileExists(atPath: file4.path))
+
+        try FileUtils.recursiveRemove(pattern: sourceDir.path)
+
+        #expect(!fileManager.fileExists(atPath: sourceDir.path))
+
+        try fileManager.removeItem(at: uniqueTestDir)
+    }
+
+    @Test
     func testRecursiveRemoveWithNonExistentSource() throws {
         let uniqueTestDir = testDirectory.appendingPathComponent("nonExistentSourceRemove", isDirectory: true)
         try fileManager.createDirectory(at: uniqueTestDir, withIntermediateDirectories: true)
