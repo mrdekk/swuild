@@ -9,6 +9,7 @@ public struct CompositeAction: Action {
     public static let authors = Author.defaultAuthors
 
     public let hint: String
+    public let measurementKeys: [String]?
 
     /// If true, exceptions thrown by child actions will be caught and logged,
     /// but not propagated further. If false, exceptions will be propagated normally.
@@ -22,10 +23,12 @@ public struct CompositeAction: Action {
 
     public init(
         hint: String = "-",
+        measurementKeys: [String]? = nil,
         swallowExceptions: Bool = false,
         @FlowActionsBuilder actions: @escaping (Context, Platform) -> [any Action]
     ) {
         self.hint = hint
+        self.measurementKeys = measurementKeys
         self.swallowExceptions = swallowExceptions
         self.actionsBuilder = actions
     }
@@ -35,6 +38,9 @@ public struct CompositeAction: Action {
     }
     
     public func execute(context: Context, platform: Platform) async throws {
+        let startTime = Date().timeIntervalSince1970
+        let monotonicStartTime = CFAbsoluteTimeGetCurrent()
+
         let actions = actions(for: context, and: platform)
         for action in actions {
             if swallowExceptions {
@@ -46,6 +52,21 @@ public struct CompositeAction: Action {
             } else {
                 try await action.execute(context: context, platform: platform)
             }
+        }
+
+        let monotonicEndTime = CFAbsoluteTimeGetCurrent()
+        let executionTime = monotonicEndTime - monotonicStartTime
+
+        if let keys = measurementKeys {
+            context.addMeasurement(
+                .init(
+                    contextData: context.extractContextData(for: keys),
+                    startTime: startTime,
+                    executionTime: executionTime,
+                    hint: hint
+                ),
+                withKey: hint
+            )
         }
     }
 }

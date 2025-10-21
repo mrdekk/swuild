@@ -28,6 +28,10 @@ final class ContextImpl: Context, ContextPrintable {
         return contains
     }
 
+    public func option(for key: String) -> Option? {
+        return storage[key]
+    }
+
     public func printContext() {
         print("Context is:")
         for (key, option) in storage {

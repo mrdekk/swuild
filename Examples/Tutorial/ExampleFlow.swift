@@ -44,20 +44,27 @@ public struct ExampleFlow: Flow {
                 elseAction: EchoAction(hint: "Execute when condition is false", contentProvider: { .raw(arg: "Conditional action skipped") })
             ),
 
-            CompositeAction { context, platform in
+            CompositeAction(
+                hint: "Composite action example",
+                measurementKeys: ["console_output"]
+            ) { context, platform in
                 EchoAction(hint: "First action in composite", contentProvider: { .raw(arg: "First action in composite") })
                 ShellAction(hint: "Second action in composite", command: "echo", arguments: [.raw(arg: "Second action in composite")])
                 EchoAction(hint: "Third action in composite", contentProvider: { .raw(arg: "Third action in composite") })
             },
 
-            CallFlowAction(flow: BasicFlow(
-                name: "nested_flow_example",
-                platforms: [.macOS(version: .any)],
-                description: "A simple flow called from CallFlowAction"
-            ) { context, platform in
-                EchoAction(hint: "Message from nested flow", contentProvider: { .raw(arg: "This is a flow called from CallFlowAction") })
-                ShellAction(hint: "Hello from nested flow", command: "echo", arguments: [.raw(arg: "Hello from nested flow")])
-            }),
+            CallFlowAction(
+                hint: "Nested flow example",
+                measurementKeys: ["console_output"],
+                flow: BasicFlow(
+                    name: "nested_flow_example",
+                    platforms: [.macOS(version: .any)],
+                    description: "A simple flow called from CallFlowAction"
+                ) { context, platform in
+                    EchoAction(hint: "Message from nested flow", contentProvider: { .raw(arg: "This is a flow called from CallFlowAction") })
+                    ShellAction(hint: "Hello from nested flow", command: "echo", arguments: [.raw(arg: "Hello from nested flow")])
+                }
+            ),
         ]
     }
 }
