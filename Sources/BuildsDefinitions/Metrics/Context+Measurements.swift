@@ -20,9 +20,7 @@ public extension Context {
     /// Add a measurement to context
     func addMeasurement(_ measurement: Measurement, withKey key: String) {
         var measurements = getMeasurements()
-        print("Before \(measurements)")
         measurements[key] = measurement
-        print("After \(measurements)")
         
         let measurementsOption = MeasurementsOption()
         measurementsOption.value = measurements
