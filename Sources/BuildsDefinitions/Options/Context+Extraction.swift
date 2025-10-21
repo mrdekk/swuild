@@ -7,6 +7,8 @@ public extension Context {
         for key in keys {
             if let option = option(for: key) {
                 contextData[key] = option
+            } else {
+                contextData[key] = StringOption(defaultValue: "<missing>")
             }
         }
         return contextData
