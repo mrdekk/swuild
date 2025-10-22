@@ -9,7 +9,7 @@ public struct CompositeAction: Action {
     public static let authors = Author.defaultAuthors
 
     public let hint: String
-    public let measurementKeys: [String]?
+    public let measurementKeys: [String: String]?
 
     /// If true, exceptions thrown by child actions will be caught and logged,
     /// but not propagated further. If false, exceptions will be propagated normally.
@@ -23,7 +23,7 @@ public struct CompositeAction: Action {
 
     public init(
         hint: String = "-",
-        measurementKeys: [String]? = nil,
+        measurementKeys: [String: String]? = nil,
         swallowExceptions: Bool = false,
         @FlowActionsBuilder actions: @escaping (Context, Platform) -> [any Action]
     ) {

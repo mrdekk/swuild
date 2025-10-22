@@ -2,13 +2,13 @@
 
 public extension Context {
     /// Extract context data for the specified keys
-    func extractContextData(for keys: [String]) -> [String: Option] {
+    func extractContextData(for keys: [String: String]) -> [String: Option] {
         var contextData: [String: Option] = [:]
-        for key in keys {
+        for (key, defaultValue) in keys {
             if let option = option(for: key) {
                 contextData[key] = option
             } else {
-                contextData[key] = StringOption(defaultValue: "<missing>")
+                contextData[key] = StringOption(defaultValue: defaultValue)
             }
         }
         return contextData

@@ -46,7 +46,10 @@ public struct ExampleFlow: Flow {
 
             CompositeAction(
                 hint: "Composite action example",
-                measurementKeys: ["console_output"]
+                measurementKeys: [
+                    "console_output": "",
+                    "unexisted_key": "default_value",
+                ]
             ) { context, platform in
                 EchoAction(hint: "First action in composite", contentProvider: { .raw(arg: "First action in composite") })
                 ShellAction(hint: "Second action in composite", command: "echo", arguments: [.raw(arg: "Second action in composite")])
@@ -55,7 +58,10 @@ public struct ExampleFlow: Flow {
 
             CallFlowAction(
                 hint: "Nested flow example",
-                measurementKeys: ["console_output"],
+                measurementKeys: [
+                    "console_output": "",
+                    "unexisted_key": "default_value",
+                ],
                 flow: BasicFlow(
                     name: "nested_flow_example",
                     platforms: [.macOS(version: .any)],

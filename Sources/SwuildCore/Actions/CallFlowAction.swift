@@ -9,13 +9,13 @@ public final class CallFlowAction: Action, FlowExecutionSummaryProvider {
     public static let authors = Author.defaultAuthors
 
     public let hint: String
-    public let measurementKeys: [String]?
+    public let measurementKeys: [String: String]?
 
     public private(set) var flowExecutionSummary: FlowExecutionSummary?
 
     private let flow: any Flow
 
-    public init(hint: String = "-", measurementKeys: [String]? = nil, flow: any Flow) {
+    public init(hint: String = "-", measurementKeys: [String: String]? = nil, flow: any Flow) {
         self.hint = hint
         self.measurementKeys = measurementKeys
         self.flow = flow
