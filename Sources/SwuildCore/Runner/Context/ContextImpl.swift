@@ -44,7 +44,7 @@ final class ContextImpl: Context, ContextPrintable {
     }
 }
 
-func makeContext() -> Context {
+public func makeContext() -> Context {
     return ContextImpl()
 }
 

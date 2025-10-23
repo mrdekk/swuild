@@ -42,26 +42,6 @@ struct Run: AsyncParsableCommand {
     )
     var functionName: String = "makeFlow"
 
-    /// Creates a context and populates it with values from command line options
-    /// - Returns: A new context with command line values added
-    private func createContext() throws -> Context {
-        let context = makeContext()
-
-        for contextValue in contextValues {
-            let parts = contextValue.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
-            if parts.count == 2 {
-                let key = String(parts[0])
-                let value = String(parts[1])
-                context.put(for: key, option: StringOption(defaultValue: value))
-            } else {
-                print("Invalid context value format: \(contextValue). Expected format: key=value")
-                throw ExitCode.failure
-            }
-        }
-
-        return context
-    }
-
     mutating func run() async throws {
         do {
             print("Swuild Build")
@@ -70,9 +50,14 @@ struct Run: AsyncParsableCommand {
             print("  function name: \(functionName)")
             print("  print result context: \(printResultContext)")
 
-            let buildContext = try createContext()
+            let buildRunner = makeRunner(
+                contextValues: contextValues,
+                printResultContext: false,
+                displayExecutionSummary: false
+            )
+
             let buildFlow = RunFlow(productName: flowProductName, inputFolder: inputFolder)
-            try await buildFlow.execute(context: buildContext)
+            let buildContext = try await buildRunner.run(flow: buildFlow)
 
             guard let flowPlugingPath: String = buildContext.get(for: kFlowPluginKey) else {
                 throw PackageBuilderErrors.genericBuildError(
@@ -84,16 +69,14 @@ struct Run: AsyncParsableCommand {
             try plugin.loadLibrary()
             let flowBuilder = try plugin.makeFlowBuilder(functionName: functionName)
             let flow = flowBuilder.build()
+            
+            let executionRunner = makeRunner(
+                contextValues: contextValues,
+                printResultContext: printResultContext,
+                displayExecutionSummary: true
+            )
+            _ = try await executionRunner.run(flow: flow)
 
-            let context = try createContext()
-            let summaries = try await flow.execute(context: context)
-
-            print("✅ Flow executed successfully is")
-            summaries.displayExecutionSummary()
-
-            if printResultContext, let impl = context as? ContextPrintable {
-                impl.printContext()
-            }
         } catch {
             print("⚠️ Error is \(error)")
         }
