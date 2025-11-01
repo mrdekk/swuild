@@ -4,9 +4,14 @@
 
 Swift build system (aka CI scripts with Swift language)
 
+In early development, no promises yet...
+
+But if you're interested, star the project or file issues with your suggestions. Or maybe you could make some PRs to extend the functionality. I will be very grateful.
+
 ### Pronunciation
 
-Transcription (IPA): /swɪld/
+Transcription: /swɪld/
+
 Approximate Russian pronunciation: свИлд
 
 How it sounds:
@@ -15,10 +20,6 @@ How it sounds:
 - ld — as in words build, child, wold
 
 Example rhyme: This word would rhyme with swift (quickly) and build (to construct).
-
-In early development, no promises yet...
-
-But if you're interested, star the project or file issues with your suggestions. Or maybe you could make some PRs to extend the functionality. I will be very grateful.
 
 ## Basic Usage
 
