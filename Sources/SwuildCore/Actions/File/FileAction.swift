@@ -64,7 +64,13 @@ public struct FileAction: Action {
                     throw Errors.pathIsNotFound
                 }
 
-                try await removeDirectory(path: resolvedPath)
+                do {
+                    try await removeDirectory(path: resolvedPath)
+                } catch {
+                    if outputToConsole {
+                        print("Can't remove old directory \(resolvedPath)")
+                    }
+                }
                 try await makeDirectory(path: resolvedPath, ensureCreated: ensureCreated)
 
             case let .copy(from, to, wildcardMode):
