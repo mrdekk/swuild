@@ -169,6 +169,13 @@ public class ShellExecutor {
         try process.run()
         process.waitUntilExit()
 
+        if let stdoutPipe = stdoutPipe {
+            stdoutPipe.fileHandleForReading.readabilityHandler = nil
+        }
+        if let stderrPipe = stderrPipe {
+            stderrPipe.fileHandleForReading.readabilityHandler = nil
+        }
+
         let standardOutput = {
             if captureOutput, let stdoutFileURL {
                 do {
