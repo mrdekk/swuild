@@ -11,6 +11,7 @@ public struct ConditionalAction: Action {
     public static let authors = Author.defaultAuthors
 
     public let hint: String
+    public let mutualExclusivityKey: String?
 
     private let predicate: Predicate
     private let action: any Action
@@ -18,11 +19,13 @@ public struct ConditionalAction: Action {
     
     public init(
         hint: String = "-",
+        mutualExclusivityKey: String? = nil,
         predicate: @escaping Predicate,
         action: any Action,
         elseAction: (any Action)? = nil
     ) {
         self.hint = hint
+        self.mutualExclusivityKey = mutualExclusivityKey
         self.predicate = predicate
         self.action = action
         self.elseAction = elseAction
@@ -33,10 +36,18 @@ public struct ConditionalAction: Action {
     }
     
     public func execute(context: Context, platform: Platform) async throws {
+        guard canExecute(context: context, platform: platform) else {
+            return
+        }
+
         if predicate(context, platform) {
-            return try await action.execute(context: context, platform: platform)
+            if action.canExecute(context: context, platform: platform) {
+                return try await action.execute(context: context, platform: platform)
+            }
         } else if let elseAction = elseAction {
-            return try await elseAction.execute(context: context, platform: platform)
+            if elseAction.canExecute(context: context, platform: platform) {
+                return try await elseAction.execute(context: context, platform: platform)
+            }
         }
     }
 }

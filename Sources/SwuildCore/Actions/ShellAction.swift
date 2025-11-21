@@ -19,6 +19,7 @@ public struct ShellAction: Action {
     }
 
     public let hint: String
+    public let mutualExclusivityKey: String?
 
     private let command: String
     private let arguments: [Argument<String>]
@@ -29,6 +30,7 @@ public struct ShellAction: Action {
 
     public init(
         hint: String = "-",
+        mutualExclusivityKey: String? = nil,
         command: String,
         arguments: [Argument<String>] = [],
         captureOutputToKey: String? = nil,
@@ -37,6 +39,7 @@ public struct ShellAction: Action {
         workingDirectory: String = FileManager.default.currentDirectoryPath
     ) {
         self.hint = hint
+        self.mutualExclusivityKey = mutualExclusivityKey
         self.command = command
         self.arguments = arguments
         self.captureOutputToKey = captureOutputToKey

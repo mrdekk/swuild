@@ -59,6 +59,20 @@ public protocol Flow {
     func execute(context: Context) async throws -> [FlowExecutionSummary]
 }
 
+public extension Action {
+    func canExecute(context: Context, platform: Platform) -> Bool {
+        if let key = mutualExclusivityKey {
+            if context.isMutualExclusivityKeyExecuted(key) {
+                print("❗️ Skipping \(Self.name) action [\(hint)] due to mutual exclusivity key '\(key)' already executed")
+                return false
+            }
+            context.addExecutedMutualExclusivityKey(key)
+        }
+
+        return true
+    }
+}
+
 public extension Flow {
     func execute(context: Context, platform: Platform) async throws -> FlowExecutionSummary {
         let actions = try actions(for: context, and: platform)
@@ -67,6 +81,10 @@ public extension Flow {
         let flowStartTime = CFAbsoluteTimeGetCurrent()
 
         for action in actions {
+            guard action.canExecute(context: context, platform: platform) else {
+                continue
+            }
+
             print("⚡️ Executing \(type(of: action).name) action [\(action.hint)]...")
             guard type(of: action).isSupported(for: platform) else {
                 print("❗️ Action \(type(of: action).name) is not supported for \(platform), skipping!")

@@ -15,11 +15,13 @@ public struct AdHocAction: Action {
     }
 
     public let hint: String
+    public let mutualExclusivityKey: String?
 
     private let action: AdHocAction
 
-    public init(hint: String = "-", action: @escaping AdHocAction) {
+    public init(hint: String = "-", mutualExclusivityKey: String? = nil, action: @escaping AdHocAction) {
         self.hint = hint
+        self.mutualExclusivityKey = mutualExclusivityKey
         self.action = action
     }
 

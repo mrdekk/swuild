@@ -16,16 +16,18 @@ public struct EchoAction: Action {
     }
 
     public let hint: String
+    public let mutualExclusivityKey: String?
 
     private let contentProvider: ContentProvider
 
-    public init(hint: String = "-", contentProvider: @escaping ContentProvider) {
+    public init(hint: String = "-", mutualExclusivityKey: String? = nil, contentProvider: @escaping ContentProvider) {
         self.hint = hint
+        self.mutualExclusivityKey = mutualExclusivityKey
         self.contentProvider = contentProvider
     }
 
-    public init(hint: String = "-", content: String) {
-        self.init(hint: hint, contentProvider: { .raw(arg: content) })
+    public init(hint: String = "-", mutualExclusivityKey: String? = nil, content: String) {
+        self.init(hint: hint, mutualExclusivityKey: mutualExclusivityKey, contentProvider: { .raw(arg: content) })
     }
 
     public func execute(context: Context, platform: Platform) async throws {

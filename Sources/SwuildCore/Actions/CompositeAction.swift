@@ -9,6 +9,7 @@ public struct CompositeAction: Action {
     public static let authors = Author.defaultAuthors
 
     public let hint: String
+    public let mutualExclusivityKey: String?
     public let measurementKeys: [String: String]?
 
     /// If true, exceptions thrown by child actions will be caught and logged,
@@ -23,11 +24,13 @@ public struct CompositeAction: Action {
 
     public init(
         hint: String = "-",
+        mutualExclusivityKey: String? = nil,
         measurementKeys: [String: String]? = nil,
         swallowExceptions: Bool = false,
         @FlowActionsBuilder actions: @escaping (Context, Platform) -> [any Action]
     ) {
         self.hint = hint
+        self.mutualExclusivityKey = mutualExclusivityKey
         self.measurementKeys = measurementKeys
         self.swallowExceptions = swallowExceptions
         self.actionsBuilder = actions
@@ -43,6 +46,10 @@ public struct CompositeAction: Action {
 
         let actions = actions(for: context, and: platform)
         for action in actions {
+            guard action.canExecute(context: context, platform: platform) else {
+                continue
+            }
+
             if swallowExceptions {
                 do {
                     try await action.execute(context: context, platform: platform)

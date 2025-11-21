@@ -20,8 +20,17 @@ public protocol Action {
     /// Hint - additional human readable info for action in flow
     var hint: String { get }
 
+    /// Mutual exclusivity key - if set, ensures that only one action with this key is executed
+    var mutualExclusivityKey: String? { get }
+
     /// Execute the action with the given context
     /// - Parameter context: The context in which to execute the action
     /// - Returns: A result indicating success or failure
     func execute(context: Context, platform: Platform) async throws
+}
+
+public extension Action {
+    var mutualExclusivityKey: String? {
+        return nil
+    }
 }

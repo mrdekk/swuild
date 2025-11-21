@@ -26,6 +26,7 @@ public struct FileAction: Action {
     }
 
     public let hint: String
+    public let mutualExclusivityKey: String?
 
     private let job: Job
     private let workingDirectory: String
@@ -33,11 +34,13 @@ public struct FileAction: Action {
 
     public init(
         hint: String = "-",
+        mutualExclusivityKey: String? = nil,
         job: Job,
         outputToConsole: Bool = false,
         workingDirectory: String = FileManager.default.currentDirectoryPath
     ) {
         self.hint = hint
+        self.mutualExclusivityKey = mutualExclusivityKey
         self.job = job
         self.outputToConsole = outputToConsole
         self.workingDirectory = workingDirectory

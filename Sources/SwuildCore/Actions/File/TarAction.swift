@@ -18,6 +18,7 @@ public struct TarAction: Action {
     }
 
     public let hint: String
+    public let mutualExclusivityKey: String?
 
     private let path: Argument<String>
     private let tarPath: Argument<String>
@@ -25,11 +26,13 @@ public struct TarAction: Action {
 
     public init(
         hint: String = "-",
+        mutualExclusivityKey: String? = nil,
         path: Argument<String>,
         tarPath: Argument<String>,
         workingDirectory: String = FileManager.default.currentDirectoryPath
     ) {
         self.hint = hint
+        self.mutualExclusivityKey = mutualExclusivityKey
         self.path = path
         self.tarPath = tarPath
         self.workingDirectory = workingDirectory

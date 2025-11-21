@@ -9,14 +9,16 @@ public final class CallFlowAction: Action, FlowExecutionSummaryProvider {
     public static let authors = Author.defaultAuthors
 
     public let hint: String
+    public let mutualExclusivityKey: String?
     public let measurementKeys: [String: String]?
 
     public private(set) var flowExecutionSummary: FlowExecutionSummary?
 
     private let flow: any Flow
 
-    public init(hint: String = "-", measurementKeys: [String: String]? = nil, flow: any Flow) {
+    public init(hint: String = "-", mutualExclusivityKey: String? = nil, measurementKeys: [String: String]? = nil, flow: any Flow) {
         self.hint = hint
+        self.mutualExclusivityKey = mutualExclusivityKey
         self.measurementKeys = measurementKeys
         self.flow = flow
     }

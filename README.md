@@ -139,6 +139,28 @@ CompositeAction { _, _ in
 }
 ```
 
+### Mutual Exclusivity
+
+Actions in Swuild support a mutual exclusivity feature that prevents duplicate execution of actions with the same key. This is particularly useful when you have actions that should only be executed once during a flow, even if they appear multiple times.
+
+To use mutual exclusivity, simply provide a `mutualExclusivityKey` when creating an action:
+
+```swift
+EchoAction(
+    hint: "Action with mutual exclusivity",
+    mutualExclusivityKey: "unique-key-1",
+    contentProvider: { "This action will only execute once" }
+)
+```
+
+If multiple actions in a flow have the same `mutualExclusivityKey`, only the first one will be executed. Subsequent actions with the same key will be skipped with a message indicating that they were skipped due to mutual exclusivity.
+
+This feature is especially useful for:
+- Ensuring expensive operations are only performed once
+- Preventing duplicate operations
+- Avoiding redundant network requests
+- Making flows more efficient by skipping unnecessary work
+
 You can define your actions as:
 
 ```swift
@@ -260,3 +282,6 @@ For more detailed examples of how to use Swuild, check out the examples in the `
 1. `Examples/TutorialBuilders` - Examples of using the function builder syntax for flows
 
 Each example contains its own README.md with detailed instructions on how to build and run it.
+
+Additionally, there is a specific example demonstrating the mutual exclusivity feature:
+- `Examples/Tutorial/MutualExclusivityExampleFlow.swift` - Shows how to use the mutualExclusivityKey property to prevent duplicate execution of actions

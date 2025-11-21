@@ -21,16 +21,19 @@ public struct SPMAction: Action {
     }
 
     public let hint: String
+    public let mutualExclusivityKey: String?
 
     private let job: Job
     private let workingDirectory: String
 
     public init(
         hint: String = "-",
+        mutualExclusivityKey: String? = nil,
         job: Job,
         workingDirectory: String = FileManager.default.currentDirectoryPath
     ) {
         self.hint = hint
+        self.mutualExclusivityKey = mutualExclusivityKey
         self.job = job
         self.workingDirectory = workingDirectory
     }
