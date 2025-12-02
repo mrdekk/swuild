@@ -71,6 +71,15 @@ public struct ExampleFlow: Flow {
                     ShellAction(hint: "Hello from nested flow", command: "echo", arguments: [.raw(arg: "Hello from nested flow")])
                 }
             ),
+
+            ZipAction(
+                hint: "Create zip archive of Sources directory",
+                params: ZipParams(
+                    path: "ExampleFlow.swift",
+                    outputPath: "Sources.zip",
+                    verbose: true
+                )
+            ),
         ]
     }
 }

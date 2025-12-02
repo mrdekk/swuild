@@ -65,9 +65,10 @@ SwuildCore provides several predefined actions that you can use in your flows:
 3. **AdHocAction**: Allows you to define custom actions inline with a closure.
 4. **FileAction**: Provides file operations like copying, moving, and deleting.
 5. **TarAction**: Creates and extracts tar archives.
-6. **ConditionalAction**: Executes an action only if a condition is met, with optional else action.
-7. **CallFlowAction**: Executes another flow.
-8. **CompositeAction**: Executes a series of actions in sequence.
+6. **ZipAction**: Creates zip archives from files or directories.
+7. **ConditionalAction**: Executes an action only if a condition is met, with optional else action.
+8. **CallFlowAction**: Executes another flow.
+9. **CompositeAction**: Executes a series of actions in sequence.
 
 ### FileAction
 
@@ -105,6 +106,72 @@ The copy operation supports:
 - Context key resolution for dynamic paths
 
 When using wildcards, the system automatically detects the base path and copies all files matching the pattern while preserving the directory structure relative to the base path.
+
+### ZipAction
+
+The `ZipAction` provides functionality for creating zip archives from files or directories. It supports various options for customizing the zip creation process through the `ZipParams` struct.
+
+#### Parameters
+
+The `ZipAction` is configured through the `ZipParams` struct which contains the following parameters:
+
+- `path`: Path to the directory or file to be zipped
+- `outputPath`: The name of the resulting zip file (optional, defaults to source path with .zip extension)
+- `verbose`: Enable verbose output of zipped files (default: true)
+- `password`: Encrypt the contents of the zip archive using a password (optional)
+- `symlinks`: Store symbolic links as such in the zip archive (default: false)
+- `include`: Array of paths or patterns to include (optional)
+- `exclude`: Array of paths or patterns to exclude (optional)
+- `workingDirectory`: The working directory for the zip command (optional)
+
+#### Example Usage
+
+```swift
+// Create a simple zip archive
+ZipAction(
+    hint: "Create zip archive of Sources directory",
+    params: ZipParams(
+        path: "Sources",
+        outputPath: "Sources.zip",
+        verbose: true
+    )
+)
+
+// Create a password-protected zip archive
+ZipAction(
+    hint: "Create password-protected zip archive",
+    params: ZipParams(
+        path: "Documents",
+        outputPath: "Documents.zip",
+        password: "secret123",
+        verbose: true
+    )
+)
+
+// Create a zip archive excluding certain files
+ZipAction(
+    hint: "Create zip archive excluding log files",
+    params: ZipParams(
+        path: "Project",
+        outputPath: "Project.zip",
+        exclude: ["*.log", "temp/*"],
+        verbose: true
+    )
+)
+
+// Create a zip archive including only specific files
+ZipAction(
+    hint: "Create zip archive with only Swift files",
+    params: ZipParams(
+        path: "Sources",
+        outputPath: "SwiftSources.zip",
+        include: ["*.swift", "**/*.swift"],
+        verbose: true
+    )
+)
+```
+
+The `ZipAction` requires the `zip` command-line tool to be installed on the system. It supports macOS platforms and provides detailed error messages for common issues such as missing source files or the zip command not being installed.
 
 ### ConditionalAction
 
