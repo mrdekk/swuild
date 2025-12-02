@@ -289,4 +289,8 @@ private class MockContext: Context {
     func getArgument(_ key: String) -> String? {
         return arguments[key] as? String
     }
+
+    func option(for key: String) -> Option? {
+        return nil
+    }
 }

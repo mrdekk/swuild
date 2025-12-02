@@ -70,7 +70,8 @@ let package = Package(
                 .byName(name: "BuildsDefinitions"),
                 .byName(name: "SwuildUtils"),
             ],
-            path: "Sources/iSwuild"
+            path: "Sources/iSwuild",
+            exclude: ["README.md"]
         ),
         .testTarget(
             name: "SwuildUtilsTests",

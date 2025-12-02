@@ -45,6 +45,17 @@ EchoAction(hint: "Print greeting message", contentProvider: { .raw(arg: "Hello W
 
 For all definitions, you have to use the 'BuildsDefinitions' package. And for some predefined actions and flows, there are SwuildCore (very basic stuff) and other packages.
 
+## Modules
+
+Swuild is organized into several modules:
+
+1. **BuildsDefinitions** - Core definitions for actions, flows, and contexts
+2. **SwuildCore** - Basic predefined actions like EchoAction, ShellAction, etc.
+3. **SwuildUtils** - Utility functions and helpers
+4. **iSwuild** - iOS/macOS specific build actions (Xcodebuild, CocoaPods, CreateXcframework)
+5. **SwuildPack** - Plugin system for extending Swuild
+6. **Swuild** - Main executable and command-line interface
+
 ## Predefined Actions in SwuildCore
 
 SwuildCore provides several predefined actions that you can use in your flows:
