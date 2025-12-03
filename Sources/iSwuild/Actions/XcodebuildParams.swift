@@ -202,7 +202,7 @@ public struct XcodebuildParams {
         public init(
             outputDirectory: String = ".",
             outputName: String? = nil,
-            buildlogPath: String = "\(NSHomeDirectory())/Library/Logs/fastlane/gym"
+            buildlogPath: String = "\(NSHomeDirectory())/Library/Logs/swuild/xcodebuild"
         ) {
             self.outputDirectory = outputDirectory
             self.outputName = outputName

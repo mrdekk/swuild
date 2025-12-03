@@ -65,9 +65,19 @@ public struct Xcodebuild: Action {
         print("Executing xcodebuild command: \(commandString)")
 
         do {
+            let logDirPath = params.output.buildlogPath
+            var isDirectory: ObjCBool = false
+            let logDirExists = FileManager.default.fileExists(atPath: logDirPath, isDirectory: &isDirectory)
+            if !logDirExists {
+                try FileManager.default.createDirectory(atPath: logDirPath, withIntermediateDirectories: true)
+            } else if !isDirectory.boolValue {
+                try FileManager.default.removeItem(atPath: logDirPath)
+                try FileManager.default.createDirectory(atPath: logDirPath, withIntermediateDirectories: true)
+            }
+
             let result = try sh(
                 command: "/bin/sh",
-                parameters: ["-c", commandString],
+                parameters: ["-c"] + buildCommand,
                 captureOutput: true
             )
             
