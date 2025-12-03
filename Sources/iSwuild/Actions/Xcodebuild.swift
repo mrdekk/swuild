@@ -77,7 +77,7 @@ public struct Xcodebuild: Action {
 
             let result = try sh(
                 command: "/bin/sh",
-                parameters: ["-c"] + buildCommand,
+                parameters: ["-c", commandString],
                 captureOutput: true
             )
             
