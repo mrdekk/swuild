@@ -460,9 +460,8 @@ extension XcodebuildParams {
     internal func defaultArchivePath() -> String {
         let buildPath = build.buildPath ?? FileManager.default.temporaryDirectory.path
         let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .short
-        let fileName = [output.outputName, formatter.string(from: Date())].compactMap { $0 }.joined(separator: " ")
+        formatter.dateFormat = "yyyy_MM_dd_HH_mm_ss"
+        let fileName = [output.outputName, formatter.string(from: Date())].compactMap { $0 }.joined(separator: "_")
         return "\(buildPath)/\(fileName).xcarchive"
     }
     
