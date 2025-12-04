@@ -393,7 +393,7 @@ extension XcodebuildParams {
         
         if let destination = build.destination {
             buildCommand.append("-destination")
-            buildCommand.append(destination)
+            buildCommand.append("\"\(destination)\"")
         }
         
         if archive.skipArchive != true {
