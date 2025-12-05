@@ -395,7 +395,12 @@ extension XcodebuildParams {
             buildCommand.append("-destination")
             buildCommand.append("\"\(destination)\"")
         }
-        
+
+        if let derivedDataPath = build.derivedDataPath {
+            buildCommand.append("-derivedDataPath")
+            buildCommand.append("\"\(derivedDataPath)\"")
+        }
+
         if archive.skipArchive != true {
             let archivePath = self.archive.archivePath ?? defaultArchivePath()
             buildCommand.append("-archivePath")
