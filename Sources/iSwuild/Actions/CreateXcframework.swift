@@ -70,7 +70,8 @@ public struct CreateXcframework: Action {
                 command: "/bin/sh",
                 parameters: ["-c"] + command,
                 captureOutput: true,
-                outputToConsole: true
+                outputToConsole: true,
+                passEnvironment: .parent(additional: [:])
             )
             
             if !result.isSucceeded {
