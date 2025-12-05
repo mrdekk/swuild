@@ -112,6 +112,22 @@ let params4 = CreateXcframeworkParams(
 let action4 = CreateXcframework(hint: "Create xcframework from simple library paths", params: params4)
 ```
 
+### XcodeSelect
+
+The `XcodeSelect` action provides functionality for changing the Xcode path to use. Useful for beta versions of Xcode or when working with multiple Xcode installations. It sets the DEVELOPER_DIR environment variable to point to the specified Xcode version.
+
+#### Usage
+
+```swift
+import iSwuild
+
+let params = XcodeSelectParams(
+    xcodePath: "/Applications/Xcode-15.0.app"
+)
+
+let action = XcodeSelect(hint: "Use Xcode 15.0", params: params)
+```
+
 ## Parameters
 
 Each action has a corresponding parameters struct that organizes configuration options into logical groups:
@@ -119,5 +135,6 @@ Each action has a corresponding parameters struct that organizes configuration o
 - `XcodebuildParams` - Configuration for xcodebuild action
 - `CocoaPodsParams` - Configuration for CocoaPods action
 - `CreateXcframeworkParams` - Configuration for create_xcframework action
+- `XcodeSelectParams` - Configuration for xcode_select action
 
 These parameter structs provide type-safe configuration with sensible defaults and clear documentation for each option.

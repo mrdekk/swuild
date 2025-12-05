@@ -89,5 +89,14 @@ let package = Package(
             ],
             path: "Tests/SwuildCoreTests"
         ),
+        .testTarget(
+            name: "iSwuildTests",
+            dependencies: [
+                .byName(name: "iSwuild"),
+                .byName(name: "SwuildCore"),
+                .byName(name: "BuildsDefinitions"),
+            ],
+            path: "Tests/iSwuildTests"
+        ),
     ]
 )
