@@ -173,6 +173,59 @@ ZipAction(
 
 The `ZipAction` requires the `zip` command-line tool to be installed on the system. It supports macOS platforms and provides detailed error messages for common issues such as missing source files or the zip command not being installed.
 
+### ShellAction
+
+The `ShellAction` allows you to execute shell commands from within your flows. It provides several options for customizing command execution and handling output.
+
+#### Parameters
+
+The `ShellAction` is configured with the following parameters:
+
+- `hint`: A human-readable description of what the action does (optional)
+- `mutualExclusivityKey`: Key to prevent duplicate execution of actions with the same key (optional)
+- `command`: The shell command to execute
+- `arguments`: Array of arguments to pass to the command (optional)
+- `captureOutputToKey`: Context key to store the command's output (optional)
+- `outputToConsole`: Whether to print command output to console (default: false)
+- `passEnvironment`: Environment variables to pass to the command (default: .no)
+- `workingDirectory`: Directory to execute the command in (default: current directory)
+- `failOnNonZeroCode`: Whether to fail the action if the command returns a non-zero exit code (default: false)
+
+#### Example Usage
+
+```swift
+// Simple command execution
+ShellAction(
+    hint: "List directory contents",
+    command: "ls",
+    arguments: [.raw(arg: "-la")]
+)
+
+// Command with output capture
+ShellAction(
+    hint: "Get current date",
+    command: "date",
+    captureOutputToKey: "currentDate"
+)
+
+// Command with console output
+ShellAction(
+    hint: "Echo with console output",
+    command: "echo",
+    arguments: [.raw(arg: "This message appears in console")],
+    outputToConsole: true
+)
+
+// Command that fails on non-zero exit code
+ShellAction(
+    hint: "Command that must succeed",
+    command: "some_critical_command",
+    failOnNonZeroCode: true
+)
+```
+
+By default, `ShellAction` will ignore non-zero exit codes and continue execution. If you want the action to fail when a command returns a non-zero exit code, set `failOnNonZeroCode` to `true`.
+
 ### ConditionalAction
 
 The `ConditionalAction` allows you to conditionally execute actions based on a predicate function that takes a `Context` and returns a `Bool`. It also supports an optional `elseAction` that will be executed if the condition is false.

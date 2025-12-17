@@ -6,6 +6,7 @@ import SwuildUtils
 
 public enum ShellActionErrors: Error {
     case internalShellError(cause: Error)
+    case nonZeroExitCode(exitCode: Int, stderr: String)
 }
 
 public struct ShellAction: Action {
@@ -27,6 +28,7 @@ public struct ShellAction: Action {
     private let outputToConsole: Bool
     private let passEnvironment: ShellExecutor.Environment
     private let workingDirectory: String
+    private let failOnNonZeroCode: Bool
 
     public init(
         hint: String = "-",
@@ -36,7 +38,8 @@ public struct ShellAction: Action {
         captureOutputToKey: String? = nil,
         outputToConsole: Bool = false,
         passEnvironment: ShellExecutor.Environment = .no,
-        workingDirectory: String = FileManager.default.currentDirectoryPath
+        workingDirectory: String = FileManager.default.currentDirectoryPath,
+        failOnNonZeroCode: Bool = false
     ) {
         self.hint = hint
         self.mutualExclusivityKey = mutualExclusivityKey
@@ -46,6 +49,7 @@ public struct ShellAction: Action {
         self.outputToConsole = outputToConsole
         self.passEnvironment = passEnvironment
         self.workingDirectory = workingDirectory
+        self.failOnNonZeroCode = failOnNonZeroCode
     }
 
     public func execute(context: Context, platform: Platform) async throws {
@@ -57,6 +61,11 @@ public struct ShellAction: Action {
                 passEnvironment: passEnvironment,
                 currentDirectoryPath: workingDirectory
             )
+
+            if failOnNonZeroCode && !result.isSucceeded {
+                throw ShellActionErrors.nonZeroExitCode(exitCode: result.exitStatus, stderr: result.standardError)
+            }
+
             if let key = captureOutputToKey {
                 context.put(for: key, option: StringOption(defaultValue: result.standardOutput))
             }
