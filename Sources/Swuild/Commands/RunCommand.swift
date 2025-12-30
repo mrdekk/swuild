@@ -67,15 +67,22 @@ struct Run: AsyncParsableCommand {
 
             let plugin = Plugin(path: flowPlugingPath)
             try plugin.loadLibrary()
-            let flowBuilder = try plugin.makeFlowBuilder(functionName: functionName)
-            let flow = flowBuilder.build()
-            
+
             let executionRunner = makeRunner(
                 contextValues: contextValues,
                 printResultContext: printResultContext,
                 displayExecutionSummary: true
             )
-            _ = try await executionRunner.run(flow: flow)
+
+            var sharedContext = buildContext
+            if let prepareFlowBuilder = try plugin.makePrepareFlowBuilder() {
+                let prepareFlow = prepareFlowBuilder.build()
+                sharedContext = try await executionRunner.run(flow: prepareFlow, context: sharedContext)
+            }
+
+            let flowBuilder = try plugin.makeFlowBuilder(functionName: functionName)
+            let flow = flowBuilder.build()
+            _ = try await executionRunner.run(flow: flow, context: sharedContext)
 
         } catch {
             print("⚠️ Error is \(error)")

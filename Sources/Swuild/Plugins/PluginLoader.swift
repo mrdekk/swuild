@@ -40,7 +40,7 @@ final class Plugin {
         resourceHandler = openRes
     }
 
-    func makeFlowBuilder(functionName: String = "makeFlow") throws -> FlowBuilder {
+    private func makeFlowBuilderImpl(functionName: String) throws -> FlowBuilder? {
         guard let resourceHandler else {
             throw PluginErrors.libraryLoadingError(message: "Library not loaded")
         }
@@ -48,12 +48,24 @@ final class Plugin {
         let sym = dlsym(resourceHandler, functionName)
 
         guard let sym else {
-            throw PluginErrors.symbolLoadingError
+            return nil
         }
 
         let f: InitFunction = unsafeBitCast(sym, to: InitFunction.self)
         let flowPointer = f()
         return Unmanaged<FlowBuilder>.fromOpaque(flowPointer).takeRetainedValue()
+    }
+
+    func makeFlowBuilder(functionName: String = "makeFlow") throws -> FlowBuilder {
+        guard let builder = try makeFlowBuilderImpl(functionName: functionName) else {
+            throw PluginErrors.symbolLoadingError
+        }
+
+        return builder
+    }
+
+    func makePrepareFlowBuilder() throws -> FlowBuilder? {
+        return try makeFlowBuilderImpl(functionName: "prepare")
     }
 
     func unload() {

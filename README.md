@@ -353,6 +353,77 @@ public func makeFlow() -> UnsafeMutableRawPointer {
 
 "makeFlow" is the function name you can provide as a parameter to swuild, and in one module you can have many of them (see TutorialBuilders for example). Swuild will use the name of the function provided in the @_cdecl annotation.
 
+## Prepare Function
+
+Swuild supports an optional `prepare` function that allows you to execute initialization code before the main flow runs. This is useful for:
+- Setting up environment variables or context values
+- Creating necessary directories
+- Validating prerequisites
+- Performing any setup tasks that must run before the main flow
+
+To use the prepare function, define it in your flow module using the `@_cdecl("prepare")` annotation:
+
+```swift
+public struct PrepareFlow: Flow {
+    public let name = "prepare_flow"
+    
+    public let platforms: [Platform] = [
+        .iOS(version: .any),
+        .macOS(version: .any),
+    ]
+    
+    public let description = "Prepare flow that runs before main flow"
+    
+    public func actions(for context: Context, and platform: Platform) -> [any Action] {
+        return [
+            EchoAction(hint: "Prepare flow started", contentProvider: { "🔧 Prepare flow execution started" }),
+            AdHocAction(hint: "Set prepare flag in context") { context, _ in
+                context.put(for: "prepare_executed", option: StringOption(defaultValue: "yes"))
+            },
+            ShellAction(
+                hint: "Create temporary directory",
+                command: "mkdir",
+                arguments: [.raw(arg: "-p"), .raw(arg: ".build/temp")],
+                outputToConsole: true
+            ),
+            EchoAction(hint: "Prepare flow completed", contentProvider: { "🔧 Prepare flow execution completed" }),
+        ]
+    }
+}
+
+@_cdecl("prepare")
+public func prepare() -> UnsafeMutableRawPointer {
+    flow { PrepareFlow() }
+}
+```
+
+When you run your flow with Swuild, it will automatically:
+1. Check if the `prepare` function is declared in your plugin
+2. If found, execute the prepare flow first
+3. Pass the context from the prepare flow to the main flow
+4. Execute the main flow with the prepared context
+
+The prepare flow and main flow share the same context, so any values set in the prepare flow will be available in the main flow. This allows you to set up configuration, validate prerequisites, or perform any initialization tasks before the main flow executes.
+
+Example of using values from prepare flow in main flow:
+
+```swift
+public func actions(for context: Context, and platform: Platform) -> [any Action] {
+    return [
+        AdHocAction(hint: "Check if prepare was executed") { context, _ in
+            if let prepareValue: String = context.get(for: "prepare_executed") {
+                print("✅ Prepare flow was executed: \(prepareValue)")
+            } else {
+                print("⚠️ Prepare flow was not executed")
+            }
+        },
+        // ... rest of your actions
+    ]
+}
+```
+
+See `Examples/Tutorial/PrepareFlow.swift` for a complete working example.
+
 ## Function Builder Support
 
 Swuild also supports a SwiftUI-like function builder syntax for defining flows, making it easier to create complex flows with conditional logic and loops. This approach is similar to how SwiftUI uses ViewBuilder for the body property.

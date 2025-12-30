@@ -8,6 +8,7 @@ public enum RunnerErrors: Error {
 
 public protocol Runner {
     func run(flow: Flow) async throws -> Context
+    func run(flow: Flow, context: Context) async throws -> Context
 }
 
 final class RunnerImpl: Runner {
@@ -27,6 +28,10 @@ final class RunnerImpl: Runner {
 
     public func run(flow: Flow) async throws -> Context {
         let context = try createContext()
+        return try await run(flow: flow, context: context)
+    }
+
+    public func run(flow: Flow, context: Context) async throws -> Context {
         let summaries = try await flow.execute(context: context)
 
         if displayExecutionSummary {

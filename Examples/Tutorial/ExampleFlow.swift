@@ -17,6 +17,13 @@ public struct ExampleFlow: Flow {
     public func actions(for context: Context, and platform: Platform) -> [any Action] {
         return [
             EchoAction(hint: "Print welcome message", contentProvider: { "Just and Echo" }),
+            AdHocAction(hint: "Check if prepare was executed") { context, _ in
+                if let prepareValue: String = context.get(for: "prepare_executed") {
+                    print("✅ Prepare flow was executed: \(prepareValue)")
+                } else {
+                    print("⚠️ Prepare flow was not executed")
+                }
+            },
             ShellAction(hint: "List directory contents", command: "ls", arguments: [.raw(arg: "-la")], captureOutputToKey: "listing"),
             EchoAction(hint: "Display directory listing", contentProvider: { .key(key: "listing") }),
 
