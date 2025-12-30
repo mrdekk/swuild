@@ -59,6 +59,8 @@ public struct CreateXcframework: Action {
         try validateArtifacts()
         
         let command = buildCommand()
+        let commandString = command.joined(separator: " ")
+
         let fileManager = FileManager.default
 
         if fileManager.fileExists(atPath: params.outputPath) {
@@ -68,7 +70,7 @@ public struct CreateXcframework: Action {
         do {
             let result = try sh(
                 command: "/bin/sh",
-                parameters: ["-c"] + command,
+                parameters: ["-c", commandString],
                 captureOutput: true,
                 outputToConsole: true,
                 passEnvironment: .parent(additional: [:])
