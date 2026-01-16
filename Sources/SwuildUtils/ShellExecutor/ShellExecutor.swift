@@ -67,9 +67,22 @@ public class ShellExecutor {
         }
 
         if outputToConsole {
+            let envLog = process.environment?.compactMap { item in
+                let stopWords = [
+                    "key", "pem", "rsa", "token",
+                ]
+                let key = item.key.lowercased()
+                let value = item.value.lowercased()
+                for stopWord in stopWords {
+                    if key.contains(stopWord) || value.contains(stopWord) {
+                        return "\(item.key)=<censored>"
+                    }
+                }
+                return "\(item.key)=\(item.value)"
+            }.joined(separator: " ")
             print("command: \(process.executableURL?.absoluteString ?? "")")
             print("arguments: \(process.arguments?.joined(separator: " ") ?? "")")
-            print("environment: \(process.environment?.compactMap { item in "\(item.key)=\(item.value)" }.joined(separator: " ") ?? "")")
+            print("environment: \(envLog ?? "")")
         }
 
         var stdoutFileURL: URL?

@@ -32,7 +32,8 @@ public struct ExampleFlow: Flow {
                 command: "echo",
                 arguments: [.raw(arg: "This message appears in console and is captured")],
                 captureOutputToKey: "console_output",
-                outputToConsole: true
+                outputToConsole: true,
+                passEnvironment: .custom(["RSA_KEY": "KEY_BEGIN"])
             ),
             EchoAction(hint: "Display console output", contentProvider: { .key(key: "console_output") }),
 
