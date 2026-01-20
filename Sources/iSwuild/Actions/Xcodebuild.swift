@@ -31,15 +31,21 @@ public struct Xcodebuild: Action {
     
     /// The parameters for configuring the xcodebuild action
     public let params: XcodebuildParams
+    public let outputToConsole: Bool
     
     // MARK: - Initialization
     
     
     /// Initialize an Xcodebuild action with the specified parameters
     /// - Parameter params: The parameters to configure the xcodebuild action
-    public init(hint: String = "-", params: XcodebuildParams) {
+    public init(
+        hint: String = "-",
+        params: XcodebuildParams,
+        outputToConsole: Bool = false
+    ) {
         self.hint = hint
         self.params = params
+        self.outputToConsole = outputToConsole
     }
     // MARK: - BuildsDefinitions.Action
     
@@ -75,10 +81,13 @@ public struct Xcodebuild: Action {
                 try FileManager.default.createDirectory(atPath: logDirPath, withIntermediateDirectories: true)
             }
 
+            var shellCommand = params.useShellCommand
+            shellCommand.append(commandString)
             let result = try sh(
-                command: "/bin/sh",
-                parameters: ["-c", commandString],
-                captureOutput: true
+                command: shellCommand.first!,
+                parameters: Array(shellCommand[1...]),
+                captureOutput: true,
+                outputToConsole: outputToConsole
             )
             
             if !result.isSucceeded {
@@ -127,10 +136,13 @@ public struct Xcodebuild: Action {
 
         print("Executing export command: \(commandString)")
         
+        var shellCommand = params.useShellCommand
+        shellCommand.append(commandString)
         let result = try sh(
-            command: "/bin/sh",
-            parameters: ["-c", commandString],
-            captureOutput: true
+            command: shellCommand.first!,
+            parameters: Array(shellCommand[1...]),
+            captureOutput: true,
+            outputToConsole: outputToConsole
         )
         
         if !result.isSucceeded {

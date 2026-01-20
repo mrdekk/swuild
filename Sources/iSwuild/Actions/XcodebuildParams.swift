@@ -324,6 +324,7 @@ public struct XcodebuildParams {
     public let skipProfileDetection: Bool
     public let xcodebuildCommand: String
     public let catalystPlatform: String?
+    public let useShellCommand: [String]
     
     // MARK: - Hierarchical Initialization
     
@@ -340,7 +341,8 @@ public struct XcodebuildParams {
         xcconfig: String? = nil,
         skipProfileDetection: Bool = false,
         xcodebuildCommand: String = "xcodebuild",
-        catalystPlatform: String? = nil
+        catalystPlatform: String? = nil,
+        useShellCommand: [String] = ["/bin/sh", "-c"]
     ) {
         self.project = project
         self.build = build
@@ -355,6 +357,7 @@ public struct XcodebuildParams {
         self.skipProfileDetection = skipProfileDetection
         self.xcodebuildCommand = xcodebuildCommand
         self.catalystPlatform = catalystPlatform
+        self.useShellCommand = useShellCommand
     }
 }
 

@@ -31,15 +31,21 @@ public struct CocoaPods: Action {
     
     /// The parameters for configuring the CocoaPods action
     public let params: CocoaPodsParams
+    public let outputToConsole: Bool
     
     // MARK: - Initialization
     
     
     /// Initialize a CocoaPods action with the specified parameters
     /// - Parameter params: The parameters to configure the CocoaPods action
-    public init(hint: String = "-", params: CocoaPodsParams) {
+    public init(
+        hint: String = "-",
+        params: CocoaPodsParams,
+        outputToConsole: Bool = false
+    ) {
         self.hint = hint
         self.params = params
+        self.outputToConsole = outputToConsole
     }
     // MARK: - BuildsDefinitions.Action
     
@@ -67,10 +73,13 @@ public struct CocoaPods: Action {
         print("Executing cocoapods command: \(commandString)")
 
         do {
+            var shellCommand = params.useShellCommand
+            shellCommand.append(commandString)
             let result = try sh(
-                command: "/bin/sh",
-                parameters: ["-c", commandString],
+                command: shellCommand.first!,
+                parameters: Array(shellCommand[1...]),
                 captureOutput: true,
+                outputToConsole: outputToConsole,
                 currentDirectoryPath: params.workingDirectory
             )
             
@@ -86,10 +95,13 @@ public struct CocoaPods: Action {
             let retryCommand = params.buildCommand(withRepoUpdate: true)
             let retryCommandString = retryCommand.joined(separator: " ")
 
+            var retryShellCommand = params.useShellCommand
+            retryShellCommand.append(retryCommandString)
             let retryResult = try sh(
-                command: "/bin/sh",
-                parameters: ["-c", retryCommandString],
+                command: retryShellCommand.first!,
+                parameters: Array(retryShellCommand[1...]),
                 captureOutput: true,
+                outputToConsole: outputToConsole,
                 currentDirectoryPath: params.workingDirectory
             )
 

@@ -30,7 +30,7 @@ public struct StandardAppBuildFlow: Flow {
                 hint: "Build and archive StandardApp for iOS",
                 params: .init(
                     project: .init(
-                        project: "Examples/StandardApp/StandardApp/StandardApp.xcodeproj",
+                        project: "../StandardApp/StandardApp.xcodeproj",
                         scheme: "StandardApp",
                         configuration: "Release"
                     ),
@@ -53,8 +53,10 @@ public struct StandardAppBuildFlow: Flow {
                         buildlogPath: "./logs"
                     ),
                     formatting: .init(),
-                    package: .init()
-                )
+                    package: .init(),
+                    useShellCommand: ["/bin/bash", "-l", "-c"]
+                ),
+                outputToConsole: true
             )
         ]
     }

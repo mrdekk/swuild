@@ -38,6 +38,10 @@ public struct CocoaPodsParams {
     /// The working directory for the pod command
     public let workingDirectory: String?
     
+    /// Shell command to use for execution (e.g., ["/bin/bash", "-l", "-c"])
+    /// Empty array means direct execution
+    public let useShellCommand: [String]
+
     // MARK: - Initialization
     
     public init(
@@ -51,7 +55,8 @@ public struct CocoaPodsParams {
         tryRepoUpdateOnError: Bool = false,
         deployment: Bool = false,
         allowRoot: Bool = false,
-        workingDirectory: String? = nil
+        workingDirectory: String? = nil,
+        useShellCommand: [String] = ["/bin/sh", "-c"]
     ) {
         self.repoUpdate = repoUpdate
         self.cleanInstall = cleanInstall
@@ -64,6 +69,7 @@ public struct CocoaPodsParams {
         self.deployment = deployment
         self.allowRoot = allowRoot
         self.workingDirectory = workingDirectory
+        self.useShellCommand = useShellCommand
     }
 }
 
