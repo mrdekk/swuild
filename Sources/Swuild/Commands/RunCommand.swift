@@ -43,50 +43,45 @@ struct Run: AsyncParsableCommand {
     var functionName: String = "makeFlow"
 
     mutating func run() async throws {
-        do {
-            print("Swuild Build")
-            print("  input folder: \(inputFolder)")
-            print("  flow name: \(flowProductName)")
-            print("  function name: \(functionName)")
-            print("  print result context: \(printResultContext)")
+        print("Swuild Build")
+        print("  input folder: \(inputFolder)")
+        print("  flow name: \(flowProductName)")
+        print("  function name: \(functionName)")
+        print("  print result context: \(printResultContext)")
 
-            let buildRunner = makeRunner(
-                contextValues: contextValues,
-                printResultContext: false,
-                displayExecutionSummary: false
+        let buildRunner = makeRunner(
+            contextValues: contextValues,
+            printResultContext: false,
+            displayExecutionSummary: false
+        )
+
+        let buildFlow = RunFlow(productName: flowProductName, inputFolder: inputFolder)
+        let buildContext = try await buildRunner.run(flow: buildFlow)
+
+        guard let flowPlugingPath: String = buildContext.get(for: kFlowPluginKey) else {
+            throw PackageBuilderErrors.genericBuildError(
+                message: "❌ build flow execution failure, no \(kFlowPluginKey) key"
             )
-
-            let buildFlow = RunFlow(productName: flowProductName, inputFolder: inputFolder)
-            let buildContext = try await buildRunner.run(flow: buildFlow)
-
-            guard let flowPlugingPath: String = buildContext.get(for: kFlowPluginKey) else {
-                throw PackageBuilderErrors.genericBuildError(
-                    message: "❌ build flow execution failure, no \(kFlowPluginKey) key"
-                )
-            }
-
-            let plugin = Plugin(path: flowPlugingPath)
-            try plugin.loadLibrary()
-
-            let executionRunner = makeRunner(
-                contextValues: contextValues,
-                printResultContext: printResultContext,
-                displayExecutionSummary: true
-            )
-
-            var sharedContext = buildContext
-            if let prepareFlowBuilder = try plugin.makePrepareFlowBuilder() {
-                let prepareFlow = prepareFlowBuilder.build()
-                sharedContext = try await executionRunner.run(flow: prepareFlow, context: sharedContext)
-            }
-
-            let flowBuilder = try plugin.makeFlowBuilder(functionName: functionName)
-            let flow = flowBuilder.build()
-            _ = try await executionRunner.run(flow: flow, context: sharedContext)
-
-        } catch {
-            print("⚠️ Error is \(error)")
         }
+
+        let plugin = Plugin(path: flowPlugingPath)
+        try plugin.loadLibrary()
+
+        let executionRunner = makeRunner(
+            contextValues: contextValues,
+            printResultContext: printResultContext,
+            displayExecutionSummary: true
+        )
+
+        var sharedContext = buildContext
+        if let prepareFlowBuilder = try plugin.makePrepareFlowBuilder() {
+            let prepareFlow = prepareFlowBuilder.build()
+            sharedContext = try await executionRunner.run(flow: prepareFlow, context: sharedContext)
+        }
+
+        let flowBuilder = try plugin.makeFlowBuilder(functionName: functionName)
+        let flow = flowBuilder.build()
+        _ = try await executionRunner.run(flow: flow, context: sharedContext)
     }
 }
 
